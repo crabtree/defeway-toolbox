@@ -2,6 +2,7 @@ package downloader
 
 import (
 	"fmt"
+	"io"
 	"log"
 	"os"
 	"path"
@@ -9,12 +10,17 @@ import (
 	dc "github.com/crabtree/defeway-toolbox/pkg/defewayclient"
 )
 
+type RecordingsManager interface {
+	Fetch(fetchParams dc.RecordingsFetchParams) ([]dc.RecordingMeta, error)
+	Download(recMeta dc.RecordingMeta, dst io.Writer) error
+}
+
 type cmd struct {
-	recMgr  dc.RecordingsManager
+	recMgr  RecordingsManager
 	recChan chan dc.RecordingMeta
 }
 
-func NewCmd(recMgr dc.RecordingsManager, recsChan chan dc.RecordingMeta) *cmd {
+func NewCmd(recMgr RecordingsManager, recsChan chan dc.RecordingMeta) *cmd {
 	return &cmd{
 		recMgr:  recMgr,
 		recChan: recsChan,

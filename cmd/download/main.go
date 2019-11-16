@@ -28,7 +28,7 @@ func main() {
 
 	recordingsChan := make(chan defewayclient.RecordingMeta)
 
-	cmd := downloader.NewCmd(*recMgr, recordingsChan)
+	cmd := downloader.NewCmd(recMgr, recordingsChan)
 
 	var wg sync.WaitGroup
 
