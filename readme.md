@@ -1,5 +1,8 @@
 # Defeway Toolbox
 
+[![Maintainability](https://api.codeclimate.com/v1/badges/25cd6143e39b5d2c5caa/maintainability)](https://codeclimate.com/github/crabtree/defeway-toolbox/maintainability)
+[![Go Report Card](https://goreportcard.com/badge/github.com/crabtree/defeway-toolbox)](https://goreportcard.com/report/github.com/crabtree/defeway-toolbox)
+
 ## Build defeway-download binary
 
 ```
