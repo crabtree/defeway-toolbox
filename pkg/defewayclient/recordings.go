@@ -55,7 +55,7 @@ func (rm *RecordingsManager) fetch(recSearch DefewayRecSearch) ([]RecordingMeta,
 			return nil, fmt.Errorf("max retry count reached")
 		}
 
-		payload := NewJuanForRecSearch(recSearch)
+		payload := NewForRecSearch(recSearch)
 
 		payloadStr, err := payload.Marshal()
 		if err != nil {

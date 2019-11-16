@@ -25,7 +25,7 @@ func (dj *DefewayJuan) Marshal() (string, error) {
 	return string(b), nil
 }
 
-func NewJuanForRecSearch(recSearch DefewayRecSearch) *DefewayJuan {
+func NewForRecSearch(recSearch DefewayRecSearch) *DefewayJuan {
 	return &DefewayJuan{
 		RecSearch: &recSearch,
 	}
