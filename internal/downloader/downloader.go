@@ -44,7 +44,7 @@ func (c *cmd) FetchRecordings(params dc.RecordingsFetchParams) error {
 
 func (c *cmd) ProcessRecordings(outDir string, overwrite bool) error {
 	for rec := range c.recChan {
-		dstPath := path.Join(outDir, fmt.Sprintf("%d.flv", rec.RecordingID))
+		dstPath := path.Join(outDir, getFileName(rec))
 		exists, err := fileExists(dstPath)
 		if err != nil {
 			log.Println(err)
@@ -80,6 +80,10 @@ func (c *cmd) downloadFile(dstPath string, recMeta dc.RecordingMeta) error {
 	}
 
 	return nil
+}
+
+func getFileName(rec dc.RecordingMeta) string {
+	return fmt.Sprintf("%d.%d.%d.flv", rec.RecordingID, rec.ChannelID, rec.TypeID)
 }
 
 func fileExists(dstPath string) (bool, error) {
