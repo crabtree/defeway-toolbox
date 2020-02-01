@@ -42,7 +42,7 @@ func main() {
 		}
 	}()
 
-	outDir := path.Join(params.OutputDir, params.Address.String())
+	outDir := path.Join(params.OutputDir, params.Recordings.Date.Format("2006-01-02"), params.Address.String())
 	if err = ensureRecordingsDir(outDir); err != nil {
 		log.Fatal(err)
 	}
