@@ -60,7 +60,9 @@ func (c *command) download(dstPath string, recMeta dc.RecordingMeta) error {
 	}
 	defer func() {
 		err := dst.Close()
-		log.Println(err)
+		if err != nil {
+			log.Println(err)
+		}
 	}()
 
 	if err = c.client.Download(recMeta, dst); err != nil {
