@@ -2,6 +2,7 @@ package defewayclient
 
 import (
 	"encoding/xml"
+	"fmt"
 	"strconv"
 	"strings"
 )
@@ -61,6 +62,10 @@ type RecordingMeta struct {
 	TypeID         uint16
 	StartTimestamp uint64
 	EndTimestamp   uint64
+}
+
+func (s *RecordingMeta) GetFileName() string {
+	return fmt.Sprintf("%d-%d-%d.flv", s.RecordingID, s.ChannelID, s.TypeID)
 }
 
 func (s *RecordingMeta) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {

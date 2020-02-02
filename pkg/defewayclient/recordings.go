@@ -10,14 +10,14 @@ import (
 	"time"
 )
 
-func NewRecordingsManager(client *client) *RecordingsManager {
-	return &RecordingsManager{
-		client: client,
+func NewRecordingsClient(address, username, password string) *RecordingsClient {
+	return &RecordingsClient{
+		client: NewDefewayClient(address, username, password),
 	}
 }
 
-type RecordingsManager struct {
-	client *client
+type RecordingsClient struct {
+	*client
 }
 
 type RecordingsFetchParams struct {
@@ -28,7 +28,7 @@ type RecordingsFetchParams struct {
 	StartTime      time.Time
 }
 
-func (rm *RecordingsManager) Fetch(fetchParams RecordingsFetchParams) ([]RecordingMeta, error) {
+func (rm *RecordingsClient) Fetch(fetchParams RecordingsFetchParams) ([]RecordingMeta, error) {
 	sessCount := uint(10)
 	recSearch := DefewayRecSearch{
 		BeginTime:    fetchParams.StartTime.Format("15:04:05"),
@@ -42,10 +42,10 @@ func (rm *RecordingsManager) Fetch(fetchParams RecordingsFetchParams) ([]Recordi
 		Username:     rm.client.Username,
 	}
 
-	return rm.fetch(recSearch)
+	return rm.fetchAllWithRetry(recSearch)
 }
 
-func (rm *RecordingsManager) fetch(recSearch DefewayRecSearch) ([]RecordingMeta, error) {
+func (rm *RecordingsClient) fetchAllWithRetry(recSearch DefewayRecSearch) ([]RecordingMeta, error) {
 	retryCount := 0
 	retryMax := 10
 	var result []RecordingMeta
@@ -123,7 +123,7 @@ func parseRecSearchResp(resp *http.Response) (*DefewayJuan, bool, error) {
 	return recSearchRes, false, nil
 }
 
-func (rm *RecordingsManager) Download(recMeta RecordingMeta, dst io.Writer) error {
+func (rm *RecordingsClient) Download(recMeta RecordingMeta, dst io.Writer) error {
 	queryParams := fmt.Sprintf(`u=%s&p=%s&mode=time&chn=%d&begin=%d&end=%d&mute=false&download=1`,
 		rm.client.Username,
 		rm.client.Password,

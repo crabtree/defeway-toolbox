@@ -63,6 +63,20 @@ func TestUnmarshalJuanForRecSearch(t *testing.T) {
 	})
 }
 
+func TestRecordingMeta_GetFileName(t *testing.T) {
+	t.Run("should return file name containing RecordingID, ChannelID and TypeID", func(t *testing.T) {
+		rec := RecordingMeta{
+			RecordingID: 1,
+			ChannelID:   2,
+			TypeID:      3,
+		}
+
+		fileName := rec.GetFileName()
+
+		require.Equal(t, "1-2-3.flv", fileName)
+	})
+}
+
 func validateJuan(t *testing.T, juan *DefewayJuan) {
 	require.Equal(t, "", juan.Version)
 	require.Equal(t, "", juan.SQU)

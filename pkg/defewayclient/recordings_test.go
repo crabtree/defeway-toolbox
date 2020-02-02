@@ -9,17 +9,17 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_RecordingsManager_Fetch(t *testing.T) {
+func Test_RecordingsClient_Fetch(t *testing.T) {
 	t.Run("returns error when error occures during http call", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 			rw.Write([]byte{})
 		}))
 		defer server.Close()
 
-		rm := NewRecordingsManager(&client{
+		rm := &RecordingsClient{&client{
 			FetchClient: server.Client(),
 			Address:     "invalid-address",
-		})
+		}}
 		fetchParams := RecordingsFetchParams{}
 
 		_, err := rm.Fetch(fetchParams)
@@ -38,10 +38,10 @@ func Test_RecordingsManager_Fetch(t *testing.T) {
 		}))
 		defer server.Close()
 
-		rm := NewRecordingsManager(&client{
+		rm := &RecordingsClient{&client{
 			FetchClient: server.Client(),
 			Address:     server.URL[7:],
-		})
+		}}
 		fetchParams := RecordingsFetchParams{}
 
 		_, err := rm.Fetch(fetchParams)
@@ -58,10 +58,10 @@ func Test_RecordingsManager_Fetch(t *testing.T) {
 		}))
 		defer server.Close()
 
-		rm := NewRecordingsManager(&client{
+		rm := &RecordingsClient{&client{
 			FetchClient: server.Client(),
 			Address:     server.URL[7:],
-		})
+		}}
 		fetchParams := RecordingsFetchParams{}
 
 		_, err := rm.Fetch(fetchParams)
@@ -75,10 +75,10 @@ func Test_RecordingsManager_Fetch(t *testing.T) {
 		}))
 		defer server.Close()
 
-		rm := NewRecordingsManager(&client{
+		rm := &RecordingsClient{&client{
 			FetchClient: server.Client(),
 			Address:     server.URL[7:],
-		})
+		}}
 		fetchParams := RecordingsFetchParams{}
 
 		_, err := rm.Fetch(fetchParams)
@@ -100,10 +100,10 @@ func Test_RecordingsManager_Fetch(t *testing.T) {
 		}))
 		defer server.Close()
 
-		rm := NewRecordingsManager(&client{
+		rm := &RecordingsClient{&client{
 			FetchClient: server.Client(),
 			Address:     server.URL[7:],
-		})
+		}}
 		fetchParams := RecordingsFetchParams{}
 
 		recordings, err := rm.Fetch(fetchParams)
@@ -113,7 +113,7 @@ func Test_RecordingsManager_Fetch(t *testing.T) {
 	})
 }
 
-func Test_RecordingsManager_Download(t *testing.T) {
+func Test_RecordingsClient_Download(t *testing.T) {
 	t.Run("returns error when max retry reached because of no recordings found", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 			require.Equal(t, `/cgi-bin/flv.cgi`, req.URL.Path)
@@ -121,10 +121,10 @@ func Test_RecordingsManager_Download(t *testing.T) {
 		}))
 		defer server.Close()
 
-		rm := NewRecordingsManager(&client{
+		rm := &RecordingsClient{&client{
 			DownloadClient: server.Client(),
 			Address:        server.URL[7:],
-		})
+		}}
 
 		var dst bytes.Buffer
 		recMeta := RecordingMeta{}
