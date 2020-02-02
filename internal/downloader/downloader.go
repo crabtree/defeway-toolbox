@@ -9,13 +9,13 @@ import (
 )
 
 func (c *command) fetch() (<-chan dc.RecordingMeta, error) {
-	recordingsChan := make(chan dc.RecordingMeta)
-	defer close(recordingsChan)
-
 	recordings, err := c.client.Fetch(c.params.ToRecordingsFetchParams())
 	if err != nil {
 		return nil, err
 	}
+
+	recordingsChan := make(chan dc.RecordingMeta, len(recordings))
+	defer close(recordingsChan)
 
 	for _, rec := range recordings {
 		recordingsChan <- rec
