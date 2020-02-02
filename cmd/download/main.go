@@ -6,12 +6,13 @@ import (
 	"path"
 
 	"github.com/crabtree/defeway-toolbox/internal/downloader"
+	"github.com/crabtree/defeway-toolbox/pkg/cmdtoolbox"
 	"github.com/crabtree/defeway-toolbox/pkg/defewayclient"
 )
 
 func main() {
 	params, err := NewParams()
-	dieOnError(err)
+	cmdtoolbox.DieOnError(err)
 
 	log.Println(params.Dump())
 
@@ -25,7 +26,7 @@ func main() {
 		paramsToCommandParams(params))
 
 	err = command.Run()
-	dieOnError(err)
+	cmdtoolbox.DieOnError(err)
 }
 
 func paramsToCommandParams(params *params) downloader.DownloaderParams {
@@ -41,11 +42,5 @@ func paramsToCommandParams(params *params) downloader.DownloaderParams {
 			params.Recordings.Date.Format("2006-01-02")),
 		RecordingTypes: params.Recordings.RecordingTypes,
 		StartTime:      params.Recordings.StartTime,
-	}
-}
-
-func dieOnError(err error) {
-	if err != nil {
-		log.Fatal(err)
 	}
 }

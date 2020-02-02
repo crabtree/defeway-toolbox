@@ -7,6 +7,8 @@ import (
 	"net"
 	"strconv"
 	"time"
+
+	"github.com/crabtree/defeway-toolbox/pkg/cmdtoolbox"
 )
 
 type clientParams struct {
@@ -57,7 +59,7 @@ func (p *params) Dump() string {
 }
 
 func NewParams() (*params, error) {
-	var address ipParam
+	var address cmdtoolbox.IPParam
 	var channels channelsParam
 	var date dateParam
 	var endTime timeParam
@@ -123,22 +125,6 @@ func NewParams() (*params, error) {
 			StartTime:      time.Time(startTime),
 		},
 	}, nil
-}
-
-type ipParam net.IP
-
-func (ip *ipParam) String() string {
-	return "IP address parameter"
-}
-
-func (ip *ipParam) Set(value string) error {
-	_ip := net.ParseIP(value)
-	if _ip == nil {
-		return fmt.Errorf("the value %s is not a valid IP address", value)
-	}
-
-	*ip = ipParam(_ip)
-	return nil
 }
 
 type channelsParam uint16
