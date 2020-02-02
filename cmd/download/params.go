@@ -9,20 +9,27 @@ import (
 	"time"
 )
 
-type params struct {
-	Address    net.IP
+type clientParams struct {
+	Address  net.IP
+	Password string
+	Port     uint
+	Username string
+}
+
+func (p *clientParams) Dump() string {
+	return fmt.Sprintf("Address=%s Password=%s Port=%d Username=%s",
+		p.Address, p.Password, p.Port, p.Username)
+}
+
+type downloadsParams struct {
 	Concurrent int
 	OutputDir  string
 	Overwrite  bool
-	Password   string
-	Port       uint
-	Recordings *recordingsParams
-	Username   string
 }
 
-func (p *params) Dump() string {
-	return fmt.Sprintf("Address=%s Concurrent=%d Output=%s Overwrite=%t Password=%s Port=%d Username=%s %s",
-		p.Address, p.Concurrent, p.OutputDir, p.Overwrite, p.Password, p.Port, p.Username, p.Recordings.Dump())
+func (p *downloadsParams) Dump() string {
+	return fmt.Sprintf("Concurrent=%d Output=%s Overwrite=%t",
+		p.Concurrent, p.OutputDir, p.Overwrite)
 }
 
 type recordingsParams struct {
@@ -36,6 +43,17 @@ type recordingsParams struct {
 func (p *recordingsParams) Dump() string {
 	return fmt.Sprintf("Channels=%d Date=%s EndTime=%s RecordingTypes=%d StartTime=%s",
 		p.Channels, p.Date.Format("2006-01-02"), p.EndTime.Format("15:04:05"), p.RecordingTypes, p.StartTime.Format("15:04:05"))
+}
+
+type params struct {
+	Client     *clientParams
+	Downloads  *downloadsParams
+	Recordings *recordingsParams
+}
+
+func (p *params) Dump() string {
+	return fmt.Sprintf("%s %s %s",
+		p.Client.Dump(), p.Downloads.Dump(), p.Recordings.Dump())
 }
 
 func NewParams() (*params, error) {
@@ -86,12 +104,17 @@ func NewParams() (*params, error) {
 	}
 
 	return &params{
-		Address:    net.IP(address),
-		Concurrent: *concurrent,
-		OutputDir:  *outputDir,
-		Overwrite:  *overwrite,
-		Password:   *password,
-		Port:       uint(*port),
+		Client: &clientParams{
+			Address:  net.IP(address),
+			Password: *password,
+			Port:     uint(*port),
+			Username: *username,
+		},
+		Downloads: &downloadsParams{
+			Concurrent: *concurrent,
+			OutputDir:  *outputDir,
+			Overwrite:  *overwrite,
+		},
 		Recordings: &recordingsParams{
 			Channels:       uint16(channels),
 			Date:           time.Time(date),
@@ -99,7 +122,6 @@ func NewParams() (*params, error) {
 			RecordingTypes: uint16(types),
 			StartTime:      time.Time(startTime),
 		},
-		Username: *username,
 	}, nil
 }
 

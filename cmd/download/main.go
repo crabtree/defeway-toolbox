@@ -3,9 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
 	"path"
-	"sync"
 
 	"github.com/crabtree/defeway-toolbox/internal/downloader"
 	"github.com/crabtree/defeway-toolbox/pkg/defewayclient"
@@ -13,71 +11,41 @@ import (
 
 func main() {
 	params, err := NewParams()
-	if err != nil {
-		log.Fatal(err)
-	}
+	dieOnError(err)
 
 	log.Println(params.Dump())
 
-	client := defewayclient.NewDefewayClient(
-		fmt.Sprintf("%s:%d", params.Address, params.Port),
-		params.Username,
-		params.Password)
+	client := defewayclient.NewRecordingsClient(
+		fmt.Sprintf("%s:%d", params.Client.Address, params.Client.Port),
+		params.Client.Username,
+		params.Client.Password)
 
-	recMgr := defewayclient.NewRecordingsManager(client)
+	command := downloader.NewCommand(
+		client,
+		paramsToCommandParams(params))
 
-	recordingsChan := make(chan defewayclient.RecordingMeta)
-
-	cmd := downloader.NewCmd(recMgr, recordingsChan)
-
-	var wg sync.WaitGroup
-
-	wg.Add(1)
-
-	go func() {
-		defer wg.Done()
-		err := cmd.FetchRecordings(paramsToRecordingsFetchParams(params))
-		if err != nil {
-			log.Fatal(err)
-		}
-	}()
-
-	outDir := path.Join(params.OutputDir, params.Recordings.Date.Format("2006-01-02"), params.Address.String())
-	if err = ensureRecordingsDir(outDir); err != nil {
-		log.Fatal(err)
-	}
-
-	for i := 0; i < params.Concurrent; i++ {
-		wg.Add(1)
-		go func() {
-			defer wg.Done()
-			err := cmd.ProcessRecordings(outDir, params.Overwrite)
-			if err != nil {
-				log.Println(err)
-			}
-		}()
-	}
-
-	log.Println("Waiting to process the recordings")
-	wg.Wait()
+	err = command.Run()
+	dieOnError(err)
 }
 
-func paramsToRecordingsFetchParams(params *params) defewayclient.RecordingsFetchParams {
-	return defewayclient.RecordingsFetchParams{
-		Channels:       params.Recordings.Channels,
-		Date:           params.Recordings.Date,
-		EndTime:        params.Recordings.EndTime,
+func paramsToCommandParams(params *params) downloader.DownloaderParams {
+	return downloader.DownloaderParams{
+		Channels:   params.Recordings.Channels,
+		Concurrent: params.Downloads.Concurrent,
+		Date:       params.Recordings.Date,
+		EndTime:    params.Recordings.EndTime,
+		Overwrite:  params.Downloads.Overwrite,
+		OutputDir: path.Join(
+			params.Downloads.OutputDir,
+			params.Recordings.Date.Format("2006-01-02"),
+			params.Client.Address.String()),
 		RecordingTypes: params.Recordings.RecordingTypes,
 		StartTime:      params.Recordings.StartTime,
 	}
 }
 
-func ensureRecordingsDir(dirPath string) error {
-	_, err := os.Stat(dirPath)
-	if os.IsNotExist(err) {
-		err := os.MkdirAll(dirPath, 0755)
-		return err
+func dieOnError(err error) {
+	if err != nil {
+		log.Fatal(err)
 	}
-
-	return err
 }

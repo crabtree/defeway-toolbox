@@ -1,7 +1,6 @@
 package downloader
 
 import (
-	"io"
 	"log"
 	"os"
 	"path"
@@ -9,56 +8,43 @@ import (
 	dc "github.com/crabtree/defeway-toolbox/pkg/defewayclient"
 )
 
-type RecordingsManager interface {
-	Fetch(fetchParams dc.RecordingsFetchParams) ([]dc.RecordingMeta, error)
-	Download(recMeta dc.RecordingMeta, dst io.Writer) error
-}
+func (c *command) fetch() (<-chan dc.RecordingMeta, error) {
+	recordingsChan := make(chan dc.RecordingMeta)
+	defer close(recordingsChan)
 
-type cmd struct {
-	recMgr  RecordingsManager
-	recChan chan dc.RecordingMeta
-}
-
-func NewCmd(recMgr RecordingsManager, recsChan chan dc.RecordingMeta) *cmd {
-	return &cmd{
-		recMgr:  recMgr,
-		recChan: recsChan,
-	}
-}
-
-func (c *cmd) FetchRecordings(params dc.RecordingsFetchParams) error {
-	defer close(c.recChan)
-
-	recordings, err := c.recMgr.Fetch(params)
+	recordings, err := c.client.Fetch(c.params.ToRecordingsFetchParams())
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	for _, rec := range recordings {
-		c.recChan <- rec
+		recordingsChan <- rec
 	}
 
-	return nil
+	return recordingsChan, nil
 }
 
-func (c *cmd) ProcessRecordings(outDir string, overwrite bool) error {
-	for rec := range c.recChan {
-		dstPath := path.Join(outDir, rec.GetFileName())
+func (c *command) process(recsChan <-chan dc.RecordingMeta) error {
+	if err := ensureRecordingsDir(c.params.OutputDir); err != nil {
+		return err
+	}
+
+	for recMeta := range recsChan {
+		dstPath := path.Join(c.params.OutputDir, recMeta.GetFileName())
 		exists, err := fileExists(dstPath)
 		if err != nil {
 			log.Println(err)
 			continue
 		}
 
-		if exists && !overwrite {
+		if exists && !c.params.Overwrite {
 			log.Printf("File %s already exists\n", dstPath)
 			continue
 		}
 
-		log.Printf("Downloading %d into %s\n", rec.RecordingID, dstPath)
+		log.Printf("Downloading %d into %s\n", recMeta.RecordingID, dstPath)
 
-		err = c.downloadFile(dstPath, rec)
-		if err != nil {
+		if err = c.download(dstPath, recMeta); err != nil {
 			log.Println(err)
 			continue
 		}
@@ -67,18 +53,31 @@ func (c *cmd) ProcessRecordings(outDir string, overwrite bool) error {
 	return nil
 }
 
-func (c *cmd) downloadFile(dstPath string, recMeta dc.RecordingMeta) error {
+func (c *command) download(dstPath string, recMeta dc.RecordingMeta) error {
 	dst, err := os.Create(dstPath)
 	if err != nil {
 		return err
 	}
-	defer dst.Close()
+	defer func() {
+		err := dst.Close()
+		log.Println(err)
+	}()
 
-	if err = c.recMgr.Download(recMeta, dst); err != nil {
+	if err = c.client.Download(recMeta, dst); err != nil {
 		return err
 	}
 
 	return nil
+}
+
+func ensureRecordingsDir(dirPath string) error {
+	_, err := os.Stat(dirPath)
+	if os.IsNotExist(err) {
+		err := os.MkdirAll(dirPath, 0755)
+		return err
+	}
+
+	return err
 }
 
 func fileExists(dstPath string) (bool, error) {
