@@ -10,11 +10,12 @@ import (
 )
 
 type params struct {
-	NetAddr  net.IP
-	NetMask  net.IPMask
-	Password string
-	Ports    []uint
-	Username string
+	Concurrent int
+	NetAddr    net.IP
+	NetMask    net.IPMask
+	Password   string
+	Ports      []uint
+	Username   string
 }
 
 func (p *params) Dump() string {
@@ -27,6 +28,7 @@ func NewParams() (*params, error) {
 	var ports portsParam
 
 	flag.Var(&netAddr, "addr", "IP address of the network")
+	concurrent := flag.Int("concurrent", 1, "sets the number of concurrent workers")
 	flag.Var(&netMask, "mask", "IP address of the network mask")
 	password := flag.String("password", "", "password for the DVR")
 	flag.Var(&ports, "port", "port number")
@@ -35,11 +37,12 @@ func NewParams() (*params, error) {
 	flag.Parse()
 
 	return &params{
-		NetAddr:  net.IP(netAddr),
-		NetMask:  net.IPMask(netMask),
-		Password: *password,
-		Ports:    ports,
-		Username: *username,
+		Concurrent: *concurrent,
+		NetAddr:    net.IP(netAddr),
+		NetMask:    net.IPMask(netMask),
+		Password:   *password,
+		Ports:      ports,
+		Username:   *username,
 	}, nil
 }
 
@@ -50,7 +53,7 @@ func (param *portsParam) String() string {
 }
 
 func (param *portsParam) Set(value string) error {
-	v, err := strconv.ParseInt(value, 10, 16)
+	v, err := strconv.ParseInt(value, 10, 32)
 	if err != nil {
 		return err
 	}

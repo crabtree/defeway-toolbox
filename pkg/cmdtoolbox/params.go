@@ -33,6 +33,8 @@ func (param *IPMaskParam) Set(value string) error {
 		return fmt.Errorf("the value %s is not a valid IP address", value)
 	}
 
-	*param = IPMaskParam(net.IPMask(ip))
+	ipArr := []byte(ip)
+
+	*param = IPMaskParam(net.IPv4Mask(ipArr[12], ipArr[13], ipArr[14], ipArr[15]))
 	return nil
 }
