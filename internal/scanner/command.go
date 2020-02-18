@@ -3,6 +3,8 @@ package scanner
 import (
 	"encoding/binary"
 	"fmt"
+	"github.com/crabtree/defeway-toolbox/pkg/defewayclient"
+	"log"
 	"math"
 	"net"
 	"sync"
@@ -19,58 +21,71 @@ func NewCommand(params ScannerParams) *command {
 }
 
 func (c *command) Run() error {
-
 	var wg sync.WaitGroup
-
-	netIP := c.params.NetAddr.Mask(c.params.NetMask)
-	fmt.Println(netIP.String())
-
-	netOnes, netBase := c.params.NetMask.Size()
-	netSize := uint32(math.Pow(2, float64((netBase - netOnes))))
-	ipStart := binary.BigEndian.Uint32(netIP)
-	ipEnd := ipStart + netSize
-
-	fmt.Printf("%+v  %+v  %+v  %+v\n", ipStart, netOnes, netBase, netSize)
-
-	addrChan := make(chan string)
+	addrChan := make(chan string, 100)
 
 	wg.Add(1)
 	go func(addrChan chan<- string) {
 		defer wg.Done()
-		defer close(addrChan)
-
-		for ipCurr := ipStart; ipCurr < ipEnd; ipCurr++ {
-			for _, port := range c.params.Ports {
-				ip := make(net.IP, 4)
-				binary.BigEndian.PutUint32(ip, ipCurr)
-				addr := fmt.Sprintf("%s:%d", ip.String(), port)
-
-				addrChan <- addr
-			}
-		}
+		c.prepareAddresses(addrChan)
 	}(addrChan)
 
 	for i := 0; i < c.params.Concurrent; i++ {
 		wg.Add(1)
 		go func(addrChan <-chan string) {
 			defer wg.Done()
-
-			for addr := range addrChan {
-				fmt.Println(addr)
+			if err := c.scan(addrChan); err != nil {
+				log.Println(err)
 			}
 		}(addrChan)
 	}
 
-	// for i := 0; i < c.params.Concurrent; i++ {
-	// 	wg.Add(1)
-	// 	go func() {
-	// 		defer wg.Done()
-	// 		if err := c.scan(); err != nil {
-	// 			log.Prinln(err)
-	// 		}
-	// 	}()
-	// }
-
 	wg.Wait()
+	return nil
+}
+
+func (c *command) prepareAddresses(addrChan chan<- string) {
+	defer close(addrChan)
+
+	netIP := c.params.NetAddr.Mask(c.params.NetMask)
+	netOnes, netBase := c.params.NetMask.Size()
+	netSize := uint32(math.Pow(2, float64((netBase - netOnes))))
+	ipStart := binary.BigEndian.Uint32(netIP)
+	ipEnd := ipStart + netSize
+
+	for ipCurr := ipStart; ipCurr < ipEnd; ipCurr++ {
+		for _, port := range c.params.Ports {
+			ip := make(net.IP, 4)
+			binary.BigEndian.PutUint32(ip, ipCurr)
+			addr := fmt.Sprintf("%s:%d", ip.String(), port)
+
+			addrChan <- addr
+		}
+	}
+}
+
+func (c *command) scan(addrChan <-chan string) error {
+	for addr := range addrChan {
+		fmt.Println(addr)
+
+		client := defewayclient.NewDeviceInfoClient(
+			addr,
+			c.params.Username,
+			c.params.Password)
+
+		info, err := client.Fetch()
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+
+		if info.EnvLoad.ErrorNo != 0 {
+			log.Printf("Found device http://%s, with env error %d\n", addr, info.EnvLoad.ErrorNo)
+			continue
+		}
+
+		log.Printf("Found device http://%s\n", addr)
+	}
+
 	return nil
 }

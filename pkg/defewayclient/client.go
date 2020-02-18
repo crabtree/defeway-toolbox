@@ -5,6 +5,11 @@ import (
 	"time"
 )
 
+const (
+	FLVScriptPath = "cgi-bin/flv.cgi"
+	GWScriptPath  = "cgi-bin/gw.cgi"
+)
+
 type client struct {
 	FetchClient    *http.Client
 	DownloadClient *http.Client

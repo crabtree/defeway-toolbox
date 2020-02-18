@@ -8,13 +8,15 @@ import (
 )
 
 type DefewayJuan struct {
-	XMLName   xml.Name          `xml:"juan"`
-	Version   string            `xml:"ver,attr"`
-	SQU       string            `xml:"squ,attr"`
-	Direction uint              `xml:"dir,attr"`
-	Enc       uint              `xml:"enc,attr"`
-	ErrorNo   uint              `xml:"errno,attr"`
-	RecSearch *DefewayRecSearch `xml:"recsearch,omitempty"`
+	XMLName    xml.Name           `xml:"juan"`
+	Version    string             `xml:"ver,attr"`
+	SQU        string             `xml:"squ,attr"`
+	Direction  uint               `xml:"dir,attr"`
+	Enc        uint               `xml:"enc,attr"`
+	ErrorNo    uint               `xml:"errno,attr"`
+	RecSearch  *DefewayRecSearch  `xml:"recsearch,omitempty"`
+	DeviceInfo *DefewayDeviceInfo `xml:"devinfo,omitempty"`
+	EnvLoad    *DefewayEnvLoad    `xml:"envload,omitempty"`
 }
 
 func (dj *DefewayJuan) Marshal() (string, error) {
@@ -110,4 +112,44 @@ func (s *RecordingMeta) UnmarshalXML(d *xml.Decoder, start xml.StartElement) err
 	}
 
 	return nil
+}
+
+type DefewayDeviceInfo struct {
+	Name             string `xml:"name,attr"`
+	Model            string `xml:"model,attr"`
+	SerialNumber     string `xml:"serialnumber,attr"`
+	HWVer            string `xml:"hwver,attr"`
+	SWVer            string `xml:"swver,attr"`
+	RelDateTime      string `xml:"reldatetime,attr"`
+	IP               string `xml:"ip,attr"`
+	HTTPPort         uint16 `xml:"httpport,attr"`
+	ClientPort       uint16 `xml:"clientport,attr"`
+	RemoteIP         string `xml:"rip,attr"`
+	RemoteHTTPPort   uint16 `xml:"rhttpport,attr"`
+	RemoteClientPort uint16 `xml:"rclinetport,attr"`
+	CamCount         uint8  `xml:"camcnt,attr"`
+}
+
+func NewForDeviceInfo(envLoad DefewayEnvLoad, devInfo DefewayDeviceInfo) *DefewayJuan {
+	return &DefewayJuan{
+		DeviceInfo: &devInfo,
+		EnvLoad:    &envLoad,
+	}
+}
+
+func UnmarshalJuanForDeviceInfo(data []byte) (*DefewayJuan, error) {
+	dj := &DefewayJuan{}
+	err := xml.Unmarshal(data, dj)
+	if err != nil {
+		return nil, err
+	}
+
+	return dj, nil
+}
+
+type DefewayEnvLoad struct {
+	Username string `xml:"usr,attr"`
+	Password string `xml:"pwd,attr"`
+	Type     uint8  `xml:"type,attr"`
+	ErrorNo  uint8  `xml:"errno,attr"`
 }

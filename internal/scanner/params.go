@@ -1,6 +1,8 @@
 package scanner
 
-import "net"
+import (
+	"net"
+)
 
 type ScannerParams struct {
 	Concurrent int

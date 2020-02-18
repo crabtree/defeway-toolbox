@@ -65,11 +65,11 @@ func (rm *RecordingsClient) fetchAllWithRetry(recSearch DefewayRecSearch) ([]Rec
 		addr := url.URL{
 			Scheme:   "http",
 			Host:     rm.client.Address,
-			Path:     "cgi-bin/gw.cgi",
+			Path:     GWScriptPath,
 			RawQuery: fmt.Sprintf("xml=%s", url.QueryEscape(payloadStr)),
 		}
 
-		resp, err := rm.client.FetchClient.Get(addr.String())
+		resp, err := rm.FetchClient.Get(addr.String())
 		if err != nil {
 			return nil, err
 		}
@@ -134,7 +134,7 @@ func (rm *RecordingsClient) Download(recMeta RecordingMeta, dst io.Writer) error
 	addr := url.URL{
 		Scheme:   "http",
 		Host:     rm.client.Address,
-		Path:     "cgi-bin/flv.cgi",
+		Path:     FLVScriptPath,
 		RawQuery: queryParams,
 	}
 
