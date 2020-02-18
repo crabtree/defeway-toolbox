@@ -19,7 +19,8 @@ type params struct {
 }
 
 func (p *params) Dump() string {
-	return fmt.Sprintf("")
+	return fmt.Sprintf("Concurrent=%d NetAddr=%s NetMask=%s Password=%s Ports=%d Username=%s",
+		p.Concurrent, p.NetAddr, p.NetMask, p.Password, p.Ports, p.Username)
 }
 
 func NewParams() (*params, error) {
@@ -35,6 +36,18 @@ func NewParams() (*params, error) {
 	username := flag.String("username", "admin", "username for the DVR")
 
 	flag.Parse()
+
+	if netAddr == nil {
+		return nil, fmt.Errorf("specify IP address of the network")
+	}
+
+	if netMask == nil {
+		return nil, fmt.Errorf("specify IP address of the network mask")
+	}
+
+	if len(ports) == 0 {
+		return nil, fmt.Errorf("secify ports to scan")
+	}
 
 	return &params{
 		Concurrent: *concurrent,

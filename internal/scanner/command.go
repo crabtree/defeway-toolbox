@@ -66,8 +66,6 @@ func (c *command) prepareAddresses(addrChan chan<- string) {
 
 func (c *command) scan(addrChan <-chan string) error {
 	for addr := range addrChan {
-		fmt.Println(addr)
-
 		client := defewayclient.NewDeviceInfoClient(
 			addr,
 			c.params.Username,
