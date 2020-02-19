@@ -23,6 +23,7 @@ func main() {
 func paramsToCommandParams(params *params) scanner.ScannerParams {
 	return scanner.ScannerParams{
 		Concurrent: params.Concurrent,
+		LogDir:     params.LogDir,
 		NetAddr:    params.NetAddr,
 		NetMask:    params.NetMask,
 		Password:   params.Password,

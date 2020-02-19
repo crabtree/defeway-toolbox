@@ -11,6 +11,7 @@ import (
 
 type params struct {
 	Concurrent int
+	LogDir     string
 	NetAddr    net.IP
 	NetMask    net.IPMask
 	Password   string
@@ -30,12 +31,17 @@ func NewParams() (*params, error) {
 
 	flag.Var(&netAddr, "addr", "IP address of the network")
 	concurrent := flag.Int("concurrent", 1, "sets the number of concurrent workers")
+	logDir := flag.String("logdir", "", "path to the logs directory")
 	flag.Var(&netMask, "mask", "IP address of the network mask")
 	password := flag.String("password", "", "password for the DVR")
 	flag.Var(&ports, "port", "port number")
 	username := flag.String("username", "admin", "username for the DVR")
 
 	flag.Parse()
+
+	if logDir == nil || *logDir == "" {
+		return nil, fmt.Errorf("specify logs directory")
+	}
 
 	if netAddr == nil {
 		return nil, fmt.Errorf("specify IP address of the network")
@@ -46,11 +52,12 @@ func NewParams() (*params, error) {
 	}
 
 	if len(ports) == 0 {
-		return nil, fmt.Errorf("secify ports to scan")
+		return nil, fmt.Errorf("specify ports to scan")
 	}
 
 	return &params{
 		Concurrent: *concurrent,
+		LogDir:     *logDir,
 		NetAddr:    net.IP(netAddr),
 		NetMask:    net.IPMask(netMask),
 		Password:   *password,
