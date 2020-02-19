@@ -107,7 +107,7 @@ func parseRecSearchResp(resp *http.Response) (*DefewayJuan, bool, error) {
 		return nil, true, err
 	}
 
-	recSearchRes, err := UnmarshalJuanForRecSearch(body)
+	recSearchRes, err := UnmarshalJuan(body)
 	if err != nil {
 		return nil, true, err
 	}

@@ -28,13 +28,7 @@ func (dj *DefewayJuan) Marshal() (string, error) {
 	return string(b), nil
 }
 
-func NewForRecSearch(recSearch DefewayRecSearch) *DefewayJuan {
-	return &DefewayJuan{
-		RecSearch: &recSearch,
-	}
-}
-
-func UnmarshalJuanForRecSearch(data []byte) (*DefewayJuan, error) {
+func UnmarshalJuan(data []byte) (*DefewayJuan, error) {
 	dj := &DefewayJuan{}
 	err := xml.Unmarshal(data, dj)
 	if err != nil {
@@ -42,6 +36,12 @@ func UnmarshalJuanForRecSearch(data []byte) (*DefewayJuan, error) {
 	}
 
 	return dj, nil
+}
+
+func NewForRecSearch(recSearch DefewayRecSearch) *DefewayJuan {
+	return &DefewayJuan{
+		RecSearch: &recSearch,
+	}
 }
 
 type DefewayRecSearch struct {
@@ -139,16 +139,6 @@ func NewForDeviceInfo(envLoad DefewayEnvLoad, devInfo DefewayDeviceInfo) *Defewa
 		DeviceInfo: &devInfo,
 		EnvLoad:    &envLoad,
 	}
-}
-
-func UnmarshalJuanForDeviceInfo(data []byte) (*DefewayJuan, error) {
-	dj := &DefewayJuan{}
-	err := xml.Unmarshal(data, dj)
-	if err != nil {
-		return nil, err
-	}
-
-	return dj, nil
 }
 
 type DefewayEnvLoad struct {

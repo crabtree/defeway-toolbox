@@ -34,15 +34,61 @@ func TestDefewayJuan(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, expectedMarshaled, marshaled)
 	})
+
+	t.Run("marshal to XML with DeviceInfo", func(t *testing.T) {
+		expectedMarshaled := `<juan ver="" squ="" dir="0" enc="0" errno="0"><devinfo name="NVR" model="CS-580" serialnumber="AA000000000000" hwver="2.1.0" swver="2.5.2.10_22322230" reldatetime="2016/08/26 16:45" ip="192.168.1.1" httpport="80" clientport="8080" rip="123.123.123.123" rhttpport="60001" rclinetport="60001" camcnt="32"></devinfo></juan>`
+		juan := DefewayJuan{
+			DeviceInfo: &DefewayDeviceInfo{
+				Name:             "NVR",
+				Model:            "CS-580",
+				SerialNumber:     "AA000000000000",
+				HWVer:            "2.1.0",
+				SWVer:            "2.5.2.10_22322230",
+				RelDateTime:      "2016/08/26 16:45",
+				IP:               "192.168.1.1",
+				ClientPort:       8080,
+				HTTPPort:         80,
+				RemoteIP:         "123.123.123.123",
+				RemoteHTTPPort:   60001,
+				RemoteClientPort: 60001,
+				CamCount:         32,
+			},
+		}
+
+		marshaled, err := juan.Marshal()
+
+		require.NoError(t, err)
+		require.Equal(t, expectedMarshaled, marshaled)
+	})
+
+	t.Run("marshal to XML with EnvLoad", func(t *testing.T) {
+		expectedMarshaled := `<juan ver="" squ="" dir="0" enc="0" errno="0"><envload usr="admin" pwd="p@ssw0rd" type="0" errno="0"></envload></juan>`
+		juan := DefewayJuan{
+			EnvLoad: &DefewayEnvLoad{
+				Username: "admin",
+				Password: "p@ssw0rd",
+				Type:     0,
+				ErrorNo:  0,
+			},
+		}
+
+		marshaled, err := juan.Marshal()
+
+		require.NoError(t, err)
+		require.Equal(t, expectedMarshaled, marshaled)
+	})
 }
 
-func TestUnmarshalJuanForRecSearch(t *testing.T) {
-	t.Run("unmarshal XML from bytes with empty RecSearch", func(t *testing.T) {
+func TestUnmarshalJuan(t *testing.T) {
+	t.Run("unmarshal XML from bytes with empty body", func(t *testing.T) {
 		juanMarshaled := `<juan ver="" squ="" dir="0" enc="0" errno="0"></juan>`
-		juan, err := UnmarshalJuanForRecSearch([]byte(juanMarshaled))
+		juan, err := UnmarshalJuan([]byte(juanMarshaled))
 
 		require.NoError(t, err)
 		require.Nil(t, juan.RecSearch)
+		require.Nil(t, juan.EnvLoad)
+		require.Nil(t, juan.DeviceInfo)
+
 		validateJuan(t, juan)
 	})
 
@@ -54,12 +100,27 @@ func TestUnmarshalJuanForRecSearch(t *testing.T) {
 				<s>0|2|3|8|1572888888|1572888890</s>
 			</recsearch>
 		</juan>`
-		juan, err := UnmarshalJuanForRecSearch([]byte(juanMarshaled))
+		juan, err := UnmarshalJuan([]byte(juanMarshaled))
 
 		require.NoError(t, err)
 		require.NotNil(t, juan.RecSearch)
 		validateRecSearch(t, juan.RecSearch)
 		validateJuan(t, juan)
+	})
+
+	t.Run("unmarshall XML from bytes with DevInfo and EnvLoad body", func(t *testing.T) {
+		juanMarshaled := `
+		<juan ver="" squ="" dir="0" enc="0" errno="0">
+			<envload usr="admin" pwd="p@ssw0rd" type="0" errno="0"></envload>
+			<devinfo name="NVR" model="CS-580" serialnumber="AA000000000000" hwver="2.1.0" swver="2.5.2.10_22322230" reldatetime="2016/08/26 16:45" ip="192.168.1.1" httpport="80" clientport="8080" rip="123.123.123.123" rhttpport="60001" rclinetport="60001" camcnt="32"></devinfo>
+		</juan>`
+		juan, err := UnmarshalJuan([]byte(juanMarshaled))
+
+		require.NoError(t, err)
+		require.NotNil(t, juan.EnvLoad)
+		require.NotNil(t, juan.DeviceInfo)
+		validateEnvLoad(t, juan.EnvLoad)
+		validateDeviceInfo(t, juan.DeviceInfo)
 	})
 }
 
@@ -74,6 +135,18 @@ func TestRecordingMeta_GetFileName(t *testing.T) {
 		fileName := rec.GetFileName()
 
 		require.Equal(t, "1-2-3.flv", fileName)
+	})
+}
+
+func TestRecordingMeta_GetFileShortName(t *testing.T) {
+	t.Run("should return short file name containing RecordingID", func(t *testing.T) {
+		rec := RecordingMeta{
+			RecordingID: 1,
+		}
+
+		fileName := rec.GetFileShortName()
+
+		require.Equal(t, "1.flv", fileName)
 	})
 }
 
@@ -116,4 +189,27 @@ func validateSearchResults(t *testing.T, searchResults []RecordingMeta) {
 	require.Equal(t, uint16(8), res2.TypeID)
 	require.Equal(t, uint64(1572888888), res2.StartTimestamp)
 	require.Equal(t, uint64(1572888890), res2.EndTimestamp)
+}
+
+func validateEnvLoad(t *testing.T, del *DefewayEnvLoad) {
+	require.Equal(t, "admin", del.Username)
+	require.Equal(t, "p@ssw0rd", del.Password)
+	require.Equal(t, uint8(0), del.Type)
+	require.Equal(t, uint8(0), del.ErrorNo)
+}
+
+func validateDeviceInfo(t *testing.T, ddi *DefewayDeviceInfo) {
+	require.Equal(t, "NVR", ddi.Name)
+	require.Equal(t, "CS-580", ddi.Model)
+	require.Equal(t, "AA000000000000", ddi.SerialNumber)
+	require.Equal(t, "2.1.0", ddi.HWVer)
+	require.Equal(t, "2.5.2.10_22322230", ddi.SWVer)
+	require.Equal(t, "2016/08/26 16:45", ddi.RelDateTime)
+	require.Equal(t, "192.168.1.1", ddi.IP)
+	require.Equal(t, uint16(80), ddi.HTTPPort)
+	require.Equal(t, uint16(8080), ddi.ClientPort)
+	require.Equal(t, "123.123.123.123", ddi.RemoteIP)
+	require.Equal(t, uint16(60001), ddi.RemoteHTTPPort)
+	require.Equal(t, uint16(60001), ddi.RemoteClientPort)
+	require.Equal(t, uint8(32), ddi.CamCount)
 }
