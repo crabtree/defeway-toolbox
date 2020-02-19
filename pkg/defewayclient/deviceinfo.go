@@ -76,7 +76,7 @@ func parseDevInfoResp(resp *http.Response) (*DefewayJuan, bool, error) {
 		return nil, true, err
 	}
 
-	devInfo, err := UnmarshalJuanForDeviceInfo(body)
+	devInfo, err := UnmarshalJuan(body)
 	if err != nil {
 		return nil, true, err
 	}
