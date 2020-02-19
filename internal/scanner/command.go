@@ -47,10 +47,9 @@ func (c *command) Run() error {
 func (c *command) prepareAddresses(addrChan chan<- string) {
 	defer close(addrChan)
 
-	netIP := c.params.NetAddr.Mask(c.params.NetMask)
 	netOnes, netBase := c.params.NetMask.Size()
 	netSize := uint32(math.Pow(2, float64((netBase - netOnes))))
-	ipStart := binary.BigEndian.Uint32(netIP)
+	ipStart := binary.BigEndian.Uint32(c.params.NetAddr.To4())
 	ipEnd := ipStart + netSize
 
 	for ipCurr := ipStart; ipCurr < ipEnd; ipCurr++ {
