@@ -5,6 +5,7 @@ import (
 	"os"
 	"path"
 
+	"github.com/crabtree/defeway-toolbox/pkg/cmdtoolbox"
 	dc "github.com/crabtree/defeway-toolbox/pkg/defewayclient"
 )
 
@@ -25,12 +26,20 @@ func (c *command) fetch() (<-chan dc.RecordingMeta, error) {
 }
 
 func (c *command) process(recsChan <-chan dc.RecordingMeta) error {
-	if err := ensureRecordingsDir(c.params.OutputDir); err != nil {
+	if err := cmdtoolbox.EnsureDir(c.params.OutputDir); err != nil {
 		return err
 	}
 
 	for recMeta := range recsChan {
+		shortNamePath := path.Join(c.params.OutputDir, recMeta.GetFileShortName())
 		dstPath := path.Join(c.params.OutputDir, recMeta.GetFileName())
+
+		err := handleExistingWithShortName(shortNamePath, dstPath)
+		if err != nil {
+			log.Println(err)
+			continue
+		}
+
 		exists, err := fileExists(dstPath)
 		if err != nil {
 			log.Println(err)
@@ -72,14 +81,17 @@ func (c *command) download(dstPath string, recMeta dc.RecordingMeta) error {
 	return nil
 }
 
-func ensureRecordingsDir(dirPath string) error {
-	_, err := os.Stat(dirPath)
-	if os.IsNotExist(err) {
-		err := os.MkdirAll(dirPath, 0755)
+func handleExistingWithShortName(shortNamePath, dstPath string) error {
+	exists, err := fileExists(shortNamePath)
+	if err != nil {
 		return err
 	}
 
-	return err
+	if !exists {
+		return nil
+	}
+
+	return os.Rename(shortNamePath, dstPath)
 }
 
 func fileExists(dstPath string) (bool, error) {

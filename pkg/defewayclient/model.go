@@ -66,6 +66,10 @@ type RecordingMeta struct {
 	EndTimestamp   uint64
 }
 
+func (s *RecordingMeta) GetFileShortName() string {
+	return fmt.Sprintf("%d.flv", s.RecordingID)
+}
+
 func (s *RecordingMeta) GetFileName() string {
 	return fmt.Sprintf("%d-%d-%d.flv", s.RecordingID, s.ChannelID, s.TypeID)
 }

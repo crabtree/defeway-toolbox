@@ -6,6 +6,7 @@ import (
 
 type ScannerParams struct {
 	Concurrent int
+	LogDir     string
 	NetAddr    net.IP
 	NetMask    net.IPMask
 	Password   string
