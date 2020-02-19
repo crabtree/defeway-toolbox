@@ -10,6 +10,12 @@ const (
 	GWScriptPath  = "cgi-bin/gw.cgi"
 )
 
+var downloadClient *http.Client = &http.Client{}
+var fetchClient *http.Client = &http.Client{
+	Timeout:   15 * time.Second,
+	Transport: &http.Transport{DisableKeepAlives: true},
+}
+
 type client struct {
 	FetchClient    *http.Client
 	DownloadClient *http.Client
@@ -20,10 +26,8 @@ type client struct {
 
 func NewDefewayClient(address, username, password string) *client {
 	return &client{
-		FetchClient: &http.Client{
-			Timeout: 30 * time.Second,
-		},
-		DownloadClient: &http.Client{},
+		FetchClient:    fetchClient,
+		DownloadClient: downloadClient,
 		Address:        address,
 		Username:       username,
 		Password:       password,
