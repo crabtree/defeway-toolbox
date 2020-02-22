@@ -26,7 +26,7 @@ Usage of `defewaydownload` binary:
 - `-start value` - recordings strat time
 - `-end value` - recordings strat time
 - `-type value` - recording type, you can specify multiple types
-- `-timeout value` - the timeout parameter for the HTTP client (default 10s)
+- `-timeout timespan` - the timeout parameter for the HTTP client (default 5s)
 - `-tls-skip-verify` - skip TLS verification
 - `-no-keep-alives` - do not keep connections alive
 
@@ -47,5 +47,5 @@ Usage of `defewayscan` binary:
 - `-password string` - password for the DVR
 - `-logdir string` - path to the logs directory
 - `-concurrent int` - the number of concurrent workers (default 1)
-- `-timeout value` - the timeout parameter for the HTTP client (default 10s)
+- `-timeout timespan` - the timeout parameter for the HTTP client (default 5s)
 - `-tls-skip-verify` - skip TLS verification
