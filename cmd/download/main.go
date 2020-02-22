@@ -16,6 +16,11 @@ func main() {
 
 	log.Println(params.Dump())
 
+	defewayclient.SetHTTPClientConfig(
+		params.Client.Timeout,
+		params.Client.DisableKeepAlives,
+		params.Client.TLSSkipVerify)
+
 	client := defewayclient.NewRecordingsClient(
 		fmt.Sprintf("%s:%d", params.Client.Address, params.Client.Port),
 		params.Client.Username,

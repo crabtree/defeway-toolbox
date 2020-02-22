@@ -17,8 +17,8 @@ func Test_RecordingsClient_Fetch(t *testing.T) {
 		defer server.Close()
 
 		rm := &RecordingsClient{&client{
-			FetchClient: server.Client(),
-			Address:     "invalid-address",
+			Client:  server.Client(),
+			Address: "invalid-address",
 		}}
 		fetchParams := RecordingsFetchParams{}
 
@@ -39,8 +39,8 @@ func Test_RecordingsClient_Fetch(t *testing.T) {
 		defer server.Close()
 
 		rm := &RecordingsClient{&client{
-			FetchClient: server.Client(),
-			Address:     server.URL[7:],
+			Client:  server.Client(),
+			Address: server.URL[7:],
 		}}
 		fetchParams := RecordingsFetchParams{}
 
@@ -59,8 +59,8 @@ func Test_RecordingsClient_Fetch(t *testing.T) {
 		defer server.Close()
 
 		rm := &RecordingsClient{&client{
-			FetchClient: server.Client(),
-			Address:     server.URL[7:],
+			Client:  server.Client(),
+			Address: server.URL[7:],
 		}}
 		fetchParams := RecordingsFetchParams{}
 
@@ -76,8 +76,8 @@ func Test_RecordingsClient_Fetch(t *testing.T) {
 		defer server.Close()
 
 		rm := &RecordingsClient{&client{
-			FetchClient: server.Client(),
-			Address:     server.URL[7:],
+			Client:  server.Client(),
+			Address: server.URL[7:],
 		}}
 		fetchParams := RecordingsFetchParams{}
 
@@ -101,8 +101,8 @@ func Test_RecordingsClient_Fetch(t *testing.T) {
 		defer server.Close()
 
 		rm := &RecordingsClient{&client{
-			FetchClient: server.Client(),
-			Address:     server.URL[7:],
+			Client:  server.Client(),
+			Address: server.URL[7:],
 		}}
 		fetchParams := RecordingsFetchParams{}
 
@@ -122,8 +122,8 @@ func Test_RecordingsClient_Download(t *testing.T) {
 		defer server.Close()
 
 		rm := &RecordingsClient{&client{
-			DownloadClient: server.Client(),
-			Address:        server.URL[7:],
+			Client:  server.Client(),
+			Address: server.URL[7:],
 		}}
 
 		var dst bytes.Buffer

@@ -12,15 +12,18 @@ import (
 )
 
 type clientParams struct {
-	Address  net.IP
-	Password string
-	Port     uint
-	Username string
+	Address           net.IP
+	DisableKeepAlives bool
+	Password          string
+	Port              uint
+	Timeout           time.Duration
+	TLSSkipVerify     bool
+	Username          string
 }
 
 func (p *clientParams) Dump() string {
-	return fmt.Sprintf("Address=%s Password=%s Port=%d Username=%s",
-		p.Address, p.Password, p.Port, p.Username)
+	return fmt.Sprintf("Address=%s DisableKeepAlives=%t Password=%s Port=%d Timeout=%d TLSSkipVerify=%t Username=%s",
+		p.Address, p.DisableKeepAlives, p.Password, p.Port, p.Timeout, p.TLSSkipVerify, p.Username)
 }
 
 type downloadsParams struct {
@@ -70,12 +73,15 @@ func NewParams() (*params, error) {
 	flag.Var(&channels, "chan", "channel id")
 	concurrent := flag.Int("concurrent", 1, "sets the number of concurrent workers")
 	flag.Var(&date, "date", "specify date in format YYYY-MM-DD (eg. 2019-01-01)")
+	disableKeepAlives := flag.Bool("no-keep-alives", false, "disables the keep alives connections")
 	flag.Var(&endTime, "end", "recording end time")
 	outputDir := flag.String("output", "", "path to the downloads directory")
 	overwrite := flag.Bool("overwrite", false, "overwrite existing files")
 	password := flag.String("password", "", "password for the DVR")
 	port := flag.Int("port", 60001, "sets the port to the DVR")
 	flag.Var(&startTime, "start", "recording start time")
+	tlsSkipVerify := flag.Bool("tls-skip-verify", false, "disables the TLS certificate verification")
+	timeout := flag.Duration("timeout", 5, "sets the client timeout")
 	flag.Var(&types, "type", "recording type")
 	username := flag.String("username", "admin", "username for the DVR")
 
@@ -107,10 +113,13 @@ func NewParams() (*params, error) {
 
 	return &params{
 		Client: &clientParams{
-			Address:  net.IP(address),
-			Password: *password,
-			Port:     uint(*port),
-			Username: *username,
+			Address:           net.IP(address),
+			DisableKeepAlives: *disableKeepAlives,
+			Password:          *password,
+			Port:              uint(*port),
+			TLSSkipVerify:     *tlsSkipVerify,
+			Timeout:           *timeout,
+			Username:          *username,
 		},
 		Downloads: &downloadsParams{
 			Concurrent: *concurrent,
