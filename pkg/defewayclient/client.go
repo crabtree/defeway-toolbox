@@ -39,12 +39,14 @@ var httpClient *http.Client
 
 func getHTTPClient() *http.Client {
 	if httpClient == nil {
+		t := &http.Transport{
+			DisableKeepAlives: cfg.DisableKeepAlives,
+			TLSClientConfig:   &tls.Config{InsecureSkipVerify: cfg.TLSSkipVerify},
+		}
+
 		httpClient = &http.Client{
-			Timeout: cfg.Timeout,
-			Transport: &http.Transport{
-				DisableKeepAlives: cfg.DisableKeepAlives,
-				TLSClientConfig:   &tls.Config{InsecureSkipVerify: cfg.TLSSkipVerify},
-			},
+			Timeout:   cfg.Timeout,
+			Transport: t,
 		}
 	}
 
