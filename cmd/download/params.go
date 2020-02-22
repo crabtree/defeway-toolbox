@@ -81,7 +81,7 @@ func NewParams() (*params, error) {
 	port := flag.Int("port", 60001, "sets the port to the DVR")
 	flag.Var(&startTime, "start", "recording start time")
 	tlsSkipVerify := flag.Bool("tls-skip-verify", false, "disables the TLS certificate verification")
-	timeout := flag.Duration("timeout", 5, "sets the client timeout")
+	timeout := flag.Duration("timeout", 5*time.Second, "sets the client timeout")
 	flag.Var(&types, "type", "recording type")
 	username := flag.String("username", "admin", "username for the DVR")
 

@@ -39,7 +39,7 @@ func NewParams() (*params, error) {
 	password := flag.String("password", "", "password for the DVR")
 	flag.Var(&ports, "port", "port number")
 	tlsSkipVerify := flag.Bool("tls-skip-verify", false, "disables the TLS certificate verification")
-	timeout := flag.Duration("timeout", 5, "sets the client timeout")
+	timeout := flag.Duration("timeout", 5*time.Second, "sets the client timeout")
 	username := flag.String("username", "admin", "username for the DVR")
 
 	flag.Parse()
