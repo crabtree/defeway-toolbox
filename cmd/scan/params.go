@@ -5,23 +5,26 @@ import (
 	"fmt"
 	"net"
 	"strconv"
+	"time"
 
 	"github.com/crabtree/defeway-toolbox/pkg/cmdtoolbox"
 )
 
 type params struct {
-	Concurrent int
-	LogDir     string
-	NetAddr    net.IP
-	NetMask    net.IPMask
-	Password   string
-	Ports      []uint
-	Username   string
+	Concurrent    int
+	LogDir        string
+	NetAddr       net.IP
+	NetMask       net.IPMask
+	Password      string
+	Ports         []uint
+	Timeout       time.Duration
+	TLSSkipVerify bool
+	Username      string
 }
 
 func (p *params) Dump() string {
-	return fmt.Sprintf("Concurrent=%d NetAddr=%s NetMask=%s Password=%s Ports=%d Username=%s",
-		p.Concurrent, p.NetAddr, p.NetMask, p.Password, p.Ports, p.Username)
+	return fmt.Sprintf("Concurrent=%d LogDir=%s NetAddr=%s NetMask=%s Password=%s Ports=%d Timeout=%d TLSSkipVerify=%t Username=%s",
+		p.Concurrent, p.LogDir, p.NetAddr, p.NetMask, p.Password, p.Ports, p.Timeout, p.TLSSkipVerify, p.Username)
 }
 
 func NewParams() (*params, error) {
@@ -35,6 +38,8 @@ func NewParams() (*params, error) {
 	flag.Var(&netMask, "mask", "IP address of the network mask")
 	password := flag.String("password", "", "password for the DVR")
 	flag.Var(&ports, "port", "port number")
+	tlsSkipVerify := flag.Bool("tls-skip-verify", false, "disables the TLS certificate verification")
+	timeout := flag.Duration("timeout", 5, "sets the client timeout")
 	username := flag.String("username", "admin", "username for the DVR")
 
 	flag.Parse()
@@ -56,13 +61,15 @@ func NewParams() (*params, error) {
 	}
 
 	return &params{
-		Concurrent: *concurrent,
-		LogDir:     *logDir,
-		NetAddr:    net.IP(netAddr),
-		NetMask:    net.IPMask(netMask),
-		Password:   *password,
-		Ports:      ports,
-		Username:   *username,
+		Concurrent:    *concurrent,
+		LogDir:        *logDir,
+		NetAddr:       net.IP(netAddr),
+		NetMask:       net.IPMask(netMask),
+		Password:      *password,
+		Ports:         ports,
+		TLSSkipVerify: *tlsSkipVerify,
+		Timeout:       *timeout,
+		Username:      *username,
 	}, nil
 }
 

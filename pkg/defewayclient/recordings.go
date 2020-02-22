@@ -69,7 +69,7 @@ func (rm *RecordingsClient) fetchAllWithRetry(recSearch DefewayRecSearch) ([]Rec
 			RawQuery: fmt.Sprintf("xml=%s", url.QueryEscape(payloadStr)),
 		}
 
-		resp, err := rm.FetchClient.Get(addr.String())
+		resp, err := rm.Client.Get(addr.String())
 		if err != nil {
 			return nil, err
 		}
@@ -138,7 +138,7 @@ func (rm *RecordingsClient) Download(recMeta RecordingMeta, dst io.Writer) error
 		RawQuery: queryParams,
 	}
 
-	resp, err := rm.client.DownloadClient.Get(addr.String())
+	resp, err := rm.client.Client.Get(addr.String())
 	if err != nil {
 		return err
 	}

@@ -48,7 +48,7 @@ func (sc *DeviceInfoClient) Fetch() (*DefewayJuan, error) {
 			RawQuery: fmt.Sprintf("xml=%s", url.QueryEscape(payloadStr)),
 		}
 
-		resp, err := sc.FetchClient.Get(addr.String())
+		resp, err := sc.Client.Get(addr.String())
 		if err != nil {
 			return nil, err
 		}
