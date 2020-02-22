@@ -26,3 +26,26 @@ Usage of `defewaydownload` binary:
 - `-start value` - recordings strat time
 - `-end value` - recordings strat time
 - `-type value` - recording type, you can specify multiple types
+- `-timeout value` - the timeout parameter for the HTTP client (default 10s)
+- `-tls-skip-verify` - skip TLS verification
+- `-no-keep-alives` - do not keep connections alive
+
+## Build defeway-scan binary
+
+```
+go build -o defewayscan ./cmd/scan
+```
+
+## Use defeway-scan binary:
+
+Usage of `defewayscan` binary:
+
+- `-addr value` - IP address from which the scanner should start its job
+- `-mask value` - network mask (eg. 255.255.255.0)
+- `-port value` - the port of the DVR to scan, you can specify multiple ports
+- `-username string` - username for the DVR (default "admin")
+- `-password string` - password for the DVR
+- `-logdir string` - path to the logs directory
+- `-concurrent int` - the number of concurrent workers (default 1)
+- `-timeout value` - the timeout parameter for the HTTP client (default 10s)
+- `-tls-skip-verify` - skip TLS verification
