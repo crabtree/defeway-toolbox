@@ -10,16 +10,17 @@ import (
 )
 
 func Test_RecordingsClient_Fetch(t *testing.T) {
+
 	t.Run("returns error when error occures during http call", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-			rw.Write([]byte{})
-		}))
+		server := httptest.NewServer(
+			http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+				rw.Write([]byte{})
+			}))
 		defer server.Close()
 
-		rm := &RecordingsClient{&client{
-			Client:  server.Client(),
-			Address: "invalid-address",
-		}}
+		rm := &RecordingsClient{
+			fetchClient: fixClient(server.Client(), "invalid-addres"),
+		}
 		fetchParams := RecordingsFetchParams{}
 
 		_, err := rm.Fetch(fetchParams)
@@ -28,20 +29,20 @@ func Test_RecordingsClient_Fetch(t *testing.T) {
 	})
 
 	t.Run("returns error when max retry reached because of no recordings found", func(t *testing.T) {
-		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
-			juanMarshaled := `
+		server := httptest.NewServer(
+			http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+				juanMarshaled := `
 			<juan ver="" squ="" dir="0" enc="0" errno="0">
 				<recsearch usr="admin" pwd="passwd" channels="3" types="15" date="2019-01-01" begin="00:00:00" end="23:59:59" session_index="0" session_count="0" session_total="0">
 				</recsearch>
 			</juan>`
-			rw.Write([]byte(juanMarshaled))
-		}))
+				rw.Write([]byte(juanMarshaled))
+			}))
 		defer server.Close()
 
-		rm := &RecordingsClient{&client{
-			Client:  server.Client(),
-			Address: server.URL[7:],
-		}}
+		rm := &RecordingsClient{
+			fetchClient: fixClient(server.Client(), server.URL[7:]),
+		}
 		fetchParams := RecordingsFetchParams{}
 
 		_, err := rm.Fetch(fetchParams)
@@ -58,10 +59,9 @@ func Test_RecordingsClient_Fetch(t *testing.T) {
 		}))
 		defer server.Close()
 
-		rm := &RecordingsClient{&client{
-			Client:  server.Client(),
-			Address: server.URL[7:],
-		}}
+		rm := &RecordingsClient{
+			fetchClient: fixClient(server.Client(), server.URL[7:]),
+		}
 		fetchParams := RecordingsFetchParams{}
 
 		_, err := rm.Fetch(fetchParams)
@@ -75,10 +75,9 @@ func Test_RecordingsClient_Fetch(t *testing.T) {
 		}))
 		defer server.Close()
 
-		rm := &RecordingsClient{&client{
-			Client:  server.Client(),
-			Address: server.URL[7:],
-		}}
+		rm := &RecordingsClient{
+			fetchClient: fixClient(server.Client(), server.URL[7:]),
+		}
 		fetchParams := RecordingsFetchParams{}
 
 		_, err := rm.Fetch(fetchParams)
@@ -100,10 +99,9 @@ func Test_RecordingsClient_Fetch(t *testing.T) {
 		}))
 		defer server.Close()
 
-		rm := &RecordingsClient{&client{
-			Client:  server.Client(),
-			Address: server.URL[7:],
-		}}
+		rm := &RecordingsClient{
+			fetchClient: fixClient(server.Client(), server.URL[7:]),
+		}
 		fetchParams := RecordingsFetchParams{}
 
 		recordings, err := rm.Fetch(fetchParams)
@@ -121,10 +119,9 @@ func Test_RecordingsClient_Download(t *testing.T) {
 		}))
 		defer server.Close()
 
-		rm := &RecordingsClient{&client{
-			Client:  server.Client(),
-			Address: server.URL[7:],
-		}}
+		rm := &RecordingsClient{
+			downloadClient: fixClient(server.Client(), server.URL[7:]),
+		}
 
 		var dst bytes.Buffer
 		recMeta := RecordingMeta{}
@@ -134,4 +131,13 @@ func Test_RecordingsClient_Download(t *testing.T) {
 		require.NoError(t, err)
 		require.Equal(t, "Hello!", dst.String())
 	})
+}
+
+func fixClient(httpCli *http.Client, addr string) *client {
+	return &client{
+		Client:   httpCli,
+		Address:  addr,
+		Username: "admin",
+		Password: "",
+	}
 }

@@ -5,7 +5,6 @@ import (
 
 	"github.com/crabtree/defeway-toolbox/internal/scanner"
 	"github.com/crabtree/defeway-toolbox/pkg/cmdtoolbox"
-	"github.com/crabtree/defeway-toolbox/pkg/defewayclient"
 )
 
 func main() {
@@ -13,11 +12,6 @@ func main() {
 	cmdtoolbox.DieOnError(err)
 
 	log.Println(params.Dump())
-
-	defewayclient.SetHTTPClientConfig(
-		params.Timeout,
-		true,
-		params.TLSSkipVerify)
 
 	command := scanner.NewCommand(
 		paramsToCommandParams(params))
@@ -28,12 +22,14 @@ func main() {
 
 func paramsToCommandParams(params *params) scanner.ScannerParams {
 	return scanner.ScannerParams{
-		Concurrent: params.Concurrent,
-		LogDir:     params.LogDir,
-		NetAddr:    params.NetAddr,
-		NetMask:    params.NetMask,
-		Password:   params.Password,
-		Ports:      params.Ports,
-		Username:   params.Username,
+		Concurrent:    params.Concurrent,
+		LogDir:        params.LogDir,
+		NetAddr:       params.NetAddr,
+		NetMask:       params.NetMask,
+		Password:      params.Password,
+		Ports:         params.Ports,
+		TLSSkipVerify: params.TLSSkipVerify,
+		Timeout:       params.Timeout,
+		Username:      params.Username,
 	}
 }

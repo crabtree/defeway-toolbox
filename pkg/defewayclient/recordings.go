@@ -10,14 +10,19 @@ import (
 	"time"
 )
 
-func NewRecordingsClient(address, username, password string) *RecordingsClient {
+func NewRecordingsClient(
+	fetchConfig DefewayClientConfig,
+	downloadConfig DefewayClientConfig,
+) *RecordingsClient {
 	return &RecordingsClient{
-		client: NewDefewayClient(address, username, password),
+		fetchClient:    NewDefewayClient(fetchConfig),
+		downloadClient: NewDefewayClient(downloadConfig),
 	}
 }
 
 type RecordingsClient struct {
-	*client
+	fetchClient    *client
+	downloadClient *client
 }
 
 type RecordingsFetchParams struct {
@@ -28,31 +33,41 @@ type RecordingsFetchParams struct {
 	StartTime      time.Time
 }
 
-func (rm *RecordingsClient) Fetch(fetchParams RecordingsFetchParams) ([]RecordingMeta, error) {
+func (rm *RecordingsClient) Fetch(
+	fetchParams RecordingsFetchParams,
+) ([]RecordingMeta, error) {
 	sessCount := uint(10)
 	recSearch := DefewayRecSearch{
 		BeginTime:    fetchParams.StartTime.Format("15:04:05"),
 		Channels:     fetchParams.Channels,
 		Date:         fetchParams.Date.Format("2006-01-02"),
 		EndTime:      fetchParams.EndTime.Format("15:04:05"),
-		Password:     rm.client.Password,
+		Password:     rm.fetchClient.Password,
 		SessionCount: sessCount,
 		SessionIdx:   0,
 		Types:        fetchParams.RecordingTypes,
-		Username:     rm.client.Username,
+		Username:     rm.fetchClient.Username,
 	}
 
 	return rm.fetchAllWithRetry(recSearch)
 }
 
-func (rm *RecordingsClient) fetchAllWithRetry(recSearch DefewayRecSearch) ([]RecordingMeta, error) {
+func (rm *RecordingsClient) fetchAllWithRetry(
+	recSearch DefewayRecSearch,
+) ([]RecordingMeta, error) {
 	retryCount := 0
 	retryMax := 10
+	interval := 500 * time.Millisecond
 	var result []RecordingMeta
 
 	for {
 		if retryCount > retryMax {
 			return nil, fmt.Errorf("max retry count reached")
+		}
+
+		if retryCount > 0 {
+			interval := time.Duration(float64(interval) * 1.5)
+			time.Sleep(interval)
 		}
 
 		payload := NewForRecSearch(recSearch)
@@ -64,12 +79,12 @@ func (rm *RecordingsClient) fetchAllWithRetry(recSearch DefewayRecSearch) ([]Rec
 
 		addr := url.URL{
 			Scheme:   "http",
-			Host:     rm.client.Address,
+			Host:     rm.fetchClient.Address,
 			Path:     GWScriptPath,
 			RawQuery: fmt.Sprintf("xml=%s", url.QueryEscape(payloadStr)),
 		}
 
-		resp, err := rm.Client.Get(addr.String())
+		resp, err := rm.fetchClient.Client.Get(addr.String())
 		if err != nil {
 			return nil, err
 		}
@@ -91,7 +106,7 @@ func (rm *RecordingsClient) fetchAllWithRetry(recSearch DefewayRecSearch) ([]Rec
 		result = append(result, recSearchRes.RecSearch.SearchResults...)
 
 		recSearch.SessionIdx += recSearch.SessionCount
-		if recSearch.SessionIdx > recSearchRes.RecSearch.SessionTotal {
+		if recSearch.SessionIdx >= recSearchRes.RecSearch.SessionTotal {
 			break
 		}
 	}
@@ -113,7 +128,9 @@ func parseRecSearchResp(resp *http.Response) (*DefewayJuan, bool, error) {
 	}
 
 	if recSearchRes.ErrorNo != 0 { // error response
-		return recSearchRes, true, fmt.Errorf("response with error code %d", recSearchRes.ErrorNo)
+		return recSearchRes,
+			true,
+			fmt.Errorf("response with error code %d", recSearchRes.ErrorNo)
 	}
 
 	if recSearchRes.RecSearch == nil || recSearchRes.RecSearch.SearchResults == nil { // empty recordings list
@@ -125,20 +142,20 @@ func parseRecSearchResp(resp *http.Response) (*DefewayJuan, bool, error) {
 
 func (rm *RecordingsClient) Download(recMeta RecordingMeta, dst io.Writer) error {
 	queryParams := fmt.Sprintf(`u=%s&p=%s&mode=time&chn=%d&begin=%d&end=%d&mute=false&download=1`,
-		rm.client.Username,
-		rm.client.Password,
+		rm.downloadClient.Username,
+		rm.downloadClient.Password,
 		recMeta.ChannelID,
 		recMeta.StartTimestamp,
 		recMeta.EndTimestamp)
 
 	addr := url.URL{
 		Scheme:   "http",
-		Host:     rm.client.Address,
+		Host:     rm.downloadClient.Address,
 		Path:     FLVScriptPath,
 		RawQuery: queryParams,
 	}
 
-	resp, err := rm.client.Client.Get(addr.String())
+	resp, err := rm.downloadClient.Client.Get(addr.String())
 	if err != nil {
 		return err
 	}

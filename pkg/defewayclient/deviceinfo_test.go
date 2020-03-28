@@ -15,10 +15,7 @@ func Test_DeviceInfoClient_Fetch(t *testing.T) {
 		}))
 		defer server.Close()
 
-		c := &DeviceInfoClient{&client{
-			Client:  server.Client(),
-			Address: "invalid-address",
-		}}
+		c := &DeviceInfoClient{fixClient(server.Client(), "invalid-address")}
 
 		_, err := c.Fetch()
 
@@ -32,10 +29,7 @@ func Test_DeviceInfoClient_Fetch(t *testing.T) {
 		}))
 		defer server.Close()
 
-		c := &DeviceInfoClient{&client{
-			Client:  server.Client(),
-			Address: server.URL[7:],
-		}}
+		c := &DeviceInfoClient{fixClient(server.Client(), server.URL[7:])}
 
 		_, err := c.Fetch()
 
@@ -48,10 +42,7 @@ func Test_DeviceInfoClient_Fetch(t *testing.T) {
 		}))
 		defer server.Close()
 
-		c := &DeviceInfoClient{&client{
-			Client:  server.Client(),
-			Address: server.URL[7:],
-		}}
+		c := &DeviceInfoClient{fixClient(server.Client(), server.URL[7:])}
 
 		_, err := c.Fetch()
 
@@ -69,10 +60,7 @@ func Test_DeviceInfoClient_Fetch(t *testing.T) {
 		}))
 		defer server.Close()
 
-		c := &DeviceInfoClient{&client{
-			Client:  server.Client(),
-			Address: server.URL[7:],
-		}}
+		c := &DeviceInfoClient{fixClient(server.Client(), server.URL[7:])}
 
 		_, err := c.Fetch()
 
@@ -91,10 +79,7 @@ func Test_DeviceInfoClient_Fetch(t *testing.T) {
 		}))
 		defer server.Close()
 
-		c := &DeviceInfoClient{&client{
-			Client:  server.Client(),
-			Address: server.URL[7:],
-		}}
+		c := &DeviceInfoClient{fixClient(server.Client(), server.URL[7:])}
 
 		juan, err := c.Fetch()
 
