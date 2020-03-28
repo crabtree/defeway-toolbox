@@ -75,9 +75,7 @@ func (c *command) prepareAddresses(addrChan chan<- string) {
 func (c *command) scan(addrChan <-chan string) error {
 	for addr := range addrChan {
 		client := defewayclient.NewDeviceInfoClient(
-			addr,
-			c.params.Username,
-			c.params.Password)
+			c.getClientConfig(addr))
 
 		info, err := client.Fetch()
 		if err != nil {
@@ -107,4 +105,17 @@ func (c *command) scan(addrChan <-chan string) error {
 	}
 
 	return nil
+}
+
+func (c *command) getClientConfig(addr string) defewayclient.DefewayClientConfig {
+	return defewayclient.DefewayClientConfig{
+		Address:  addr,
+		Username: c.params.Username,
+		Password: c.params.Password,
+		HttpClientConfig: defewayclient.HttpClientConfig{
+			Timeout:           c.params.Timeout,
+			TLSSkipVerify:     c.params.TLSSkipVerify,
+			DisableKeepAlives: true,
+		},
+	}
 }

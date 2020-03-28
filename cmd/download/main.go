@@ -16,15 +16,9 @@ func main() {
 
 	log.Println(params.Dump())
 
-	defewayclient.SetHTTPClientConfig(
-		params.Client.Timeout,
-		params.Client.DisableKeepAlives,
-		params.Client.TLSSkipVerify)
-
 	client := defewayclient.NewRecordingsClient(
-		fmt.Sprintf("%s:%d", params.Client.Address, params.Client.Port),
-		params.Client.Username,
-		params.Client.Password)
+		paramsToClientConfig(params),
+		paramsToDownloadClientConfig(params))
 
 	command := downloader.NewCommand(
 		client,
@@ -48,4 +42,24 @@ func paramsToCommandParams(params *params) downloader.DownloaderParams {
 		RecordingTypes: params.Recordings.RecordingTypes,
 		StartTime:      params.Recordings.StartTime,
 	}
+}
+
+func paramsToClientConfig(params *params) defewayclient.DefewayClientConfig {
+	return defewayclient.DefewayClientConfig{
+		Address:  fmt.Sprintf("%s:%d", params.Client.Address, params.Client.Port),
+		Username: params.Client.Username,
+		Password: params.Client.Password,
+		HttpClientConfig: defewayclient.HttpClientConfig{
+			DisableKeepAlives: params.Client.DisableKeepAlives,
+			TLSSkipVerify:     params.Client.TLSSkipVerify,
+			Timeout:           params.Client.Timeout,
+		},
+	}
+}
+
+func paramsToDownloadClientConfig(params *params) defewayclient.DefewayClientConfig {
+	cfg := paramsToClientConfig(params)
+	cfg.Timeout = 0
+
+	return cfg
 }

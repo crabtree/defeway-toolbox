@@ -3,14 +3,13 @@ package defewayclient
 import (
 	"fmt"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"net/url"
 )
 
-func NewDeviceInfoClient(address, username, password string) *DeviceInfoClient {
+func NewDeviceInfoClient(config DefewayClientConfig) *DeviceInfoClient {
 	return &DeviceInfoClient{
-		client: NewDefewayClient(address, username, password),
+		client: NewDefewayClient(config),
 	}
 }
 
@@ -59,7 +58,6 @@ func (sc *DeviceInfoClient) Fetch() (*DefewayJuan, error) {
 				return nil, err
 			}
 
-			log.Println(err.Error())
 			retryCount++
 			continue
 		}
