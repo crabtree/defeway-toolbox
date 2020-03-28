@@ -112,7 +112,7 @@ func (c *command) getClientConfig(addr string) defewayclient.DefewayClientConfig
 		Address:  addr,
 		Username: c.params.Username,
 		Password: c.params.Password,
-		HttpClientConfig: defewayclient.HttpClientConfig{
+		HTTPClientConfig: defewayclient.HTTPClientConfig{
 			Timeout:           c.params.Timeout,
 			TLSSkipVerify:     c.params.TLSSkipVerify,
 			DisableKeepAlives: true,

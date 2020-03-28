@@ -49,7 +49,7 @@ func paramsToClientConfig(params *params) defewayclient.DefewayClientConfig {
 		Address:  fmt.Sprintf("%s:%d", params.Client.Address, params.Client.Port),
 		Username: params.Client.Username,
 		Password: params.Client.Password,
-		HttpClientConfig: defewayclient.HttpClientConfig{
+		HTTPClientConfig: defewayclient.HTTPClientConfig{
 			DisableKeepAlives: params.Client.DisableKeepAlives,
 			TLSSkipVerify:     params.Client.TLSSkipVerify,
 			Timeout:           params.Client.Timeout,

@@ -11,14 +11,14 @@ const (
 	GWScriptPath  = "cgi-bin/gw.cgi"
 )
 
-type HttpClientConfig struct {
+type HTTPClientConfig struct {
 	Timeout           time.Duration
 	DisableKeepAlives bool
 	TLSSkipVerify     bool
 }
 
 type DefewayClientConfig struct {
-	HttpClientConfig
+	HTTPClientConfig
 	Address  string
 	Username string
 	Password string
