@@ -19,4 +19,6 @@ jobs:
         go-version: 1.12
 
     - name: Test
+      env:
+        GO111MODULE: "on"
       run: go test -coverprofile=c.out -v ./...
