@@ -19,7 +19,7 @@ func Test_DeviceInfoClient_Fetch(t *testing.T) {
 
 		_, err := c.Fetch()
 
-		require.Contains(t, err.Error(), "no such host")
+		require.Contains(t, err.Error(), "dial tcp: lookup invalid-address")
 	})
 
 	t.Run("returns error when max retry reached because of error response", func(t *testing.T) {
