@@ -19,13 +19,13 @@ func Test_RecordingsClient_Fetch(t *testing.T) {
 		defer server.Close()
 
 		rm := &RecordingsClient{
-			fetchClient: fixClient(server.Client(), "invalid-addres"),
+			fetchClient: fixClient(server.Client(), "invalid-address"),
 		}
 		fetchParams := RecordingsFetchParams{}
 
 		_, err := rm.Fetch(fetchParams)
 
-		require.Contains(t, err.Error(), "no such host")
+		require.Contains(t, err.Error(), "dial tcp: lookup invalid-address")
 	})
 
 	t.Run("returns error when max retry reached because of no recordings found", func(t *testing.T) {
