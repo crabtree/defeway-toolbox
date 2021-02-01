@@ -15,17 +15,18 @@ go build -o defewaydownload ./cmd/download
 Usage of `defewaydownload` binary:
 
 - `-addr value` - IP address of the DVR
+- `-file string` - path to the XML file with a list of recordings to download
 - `-port int` - port of the DVR (default 60001)
 - `-username string` - username for the DVR (default "admin")
 - `-password string` - password for the DVR (default empty)
 - `-output string` - path to the downloads directory
 - `-overwrite` - overwrite existing files
 - `-concurrent int` - the number of concurrent workers (default 1)
-- `-chan value` - channel id, you can specify multiple channels
+- `-chan value` - channel id, you can specify multiple channels, optional when `-file` specified
 - `-date value` - date in format YYYY-MM-DD (eg. 2019-01-01)
 - `-start value` - recordings strat time
 - `-end value` - recordings end time
-- `-type value` - recording type, you can specify multiple types
+- `-type value` - recording type, you can specify multiple types, optional when `-file` specified
 - `-timeout timespan` - the timeout parameter for the HTTP client (default 5s)
 - `-tls-skip-verify` - skip TLS verification
 - `-no-keep-alives` - do not keep connections alive

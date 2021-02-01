@@ -34,6 +34,7 @@ func paramsToCommandParams(params *params) downloader.DownloaderParams {
 		Concurrent: params.Downloads.Concurrent,
 		Date:       params.Recordings.Date,
 		EndTime:    params.Recordings.EndTime,
+		InputFile:  params.Recordings.InputFile,
 		Overwrite:  params.Downloads.Overwrite,
 		OutputDir: path.Join(
 			params.Downloads.OutputDir,

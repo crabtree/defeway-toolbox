@@ -6,11 +6,21 @@ import (
 	"path"
 
 	"github.com/crabtree/defeway-toolbox/pkg/cmdtoolbox"
+	"github.com/crabtree/defeway-toolbox/pkg/defewayclient"
 	dc "github.com/crabtree/defeway-toolbox/pkg/defewayclient"
 )
 
 func (c *command) fetch() (<-chan dc.RecordingMeta, error) {
-	recordings, err := c.client.Fetch(c.params.ToRecordingsFetchParams())
+	var recordings []defewayclient.RecordingMeta
+	var err error
+
+	if cmdtoolbox.FileExists(c.params.InputFile) {
+		recordings, err = c.parseInputFile()
+
+	} else {
+		recordings, err = c.client.Fetch(c.params.ToRecordingsFetchParams())
+	}
+
 	if err != nil {
 		return nil, err
 	}
@@ -23,6 +33,20 @@ func (c *command) fetch() (<-chan dc.RecordingMeta, error) {
 	}
 
 	return recordingsChan, nil
+}
+
+func (c *command) parseInputFile() ([]defewayclient.RecordingMeta, error) {
+	data, err := cmdtoolbox.ReadFile(c.params.InputFile)
+	if err != nil {
+		return nil, err
+	}
+
+	parsed, err := defewayclient.UnmarshalJuan(data)
+	if err != nil {
+		return nil, err
+	}
+
+	return parsed.RecSearch.SearchResults, nil
 }
 
 func (c *command) process(recsChan <-chan dc.RecordingMeta) error {
