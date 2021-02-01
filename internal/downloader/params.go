@@ -11,6 +11,7 @@ type DownloaderParams struct {
 	Concurrent     int
 	Date           time.Time
 	EndTime        time.Time
+	InputFile      string
 	Overwrite      bool
 	OutputDir      string
 	RecordingTypes uint16

@@ -41,13 +41,14 @@ type recordingsParams struct {
 	Channels       uint16
 	Date           time.Time
 	EndTime        time.Time
+	InputFile      string
 	RecordingTypes uint16
 	StartTime      time.Time
 }
 
 func (p *recordingsParams) Dump() string {
-	return fmt.Sprintf("Channels=%d Date=%s EndTime=%s RecordingTypes=%d StartTime=%s",
-		p.Channels, p.Date.Format("2006-01-02"), p.EndTime.Format("15:04:05"), p.RecordingTypes, p.StartTime.Format("15:04:05"))
+	return fmt.Sprintf("Channels=%d Date=%s EndTime=%s InputFile=%s RecordingTypes=%d StartTime=%s",
+		p.Channels, p.Date.Format("2006-01-02"), p.EndTime.Format("15:04:05"), p.InputFile, p.RecordingTypes, p.StartTime.Format("15:04:05"))
 }
 
 type params struct {
@@ -75,6 +76,7 @@ func NewParams() (*params, error) {
 	flag.Var(&date, "date", "specify date in format YYYY-MM-DD (eg. 2019-01-01)")
 	disableKeepAlives := flag.Bool("no-keep-alives", false, "disables the keep alives connections")
 	flag.Var(&endTime, "end", "recording end time")
+	inputFile := flag.String("file", "", "path to the input file with recordings to download")
 	outputDir := flag.String("output", "", "path to the downloads directory")
 	overwrite := flag.Bool("overwrite", false, "overwrite existing files")
 	password := flag.String("password", "", "password for the DVR")
@@ -91,7 +93,7 @@ func NewParams() (*params, error) {
 		return nil, fmt.Errorf("specify IP address")
 	}
 
-	if channels == 0 {
+	if channels == 0 && *inputFile == "" {
 		return nil, fmt.Errorf("specify at least one channel id")
 	}
 
@@ -107,7 +109,7 @@ func NewParams() (*params, error) {
 		return nil, fmt.Errorf("specify downloads directory")
 	}
 
-	if types == 0 {
+	if types == 0 && *inputFile == "" {
 		return nil, fmt.Errorf("specify at least one recording type")
 	}
 
@@ -130,6 +132,7 @@ func NewParams() (*params, error) {
 			Channels:       uint16(channels),
 			Date:           time.Time(date),
 			EndTime:        time.Time(endTime),
+			InputFile:      *inputFile,
 			RecordingTypes: uint16(types),
 			StartTime:      time.Time(startTime),
 		},
