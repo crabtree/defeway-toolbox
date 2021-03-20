@@ -2,6 +2,7 @@ package scanner
 
 import (
 	"encoding/binary"
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 	"log"
@@ -88,17 +89,18 @@ func (c *command) scan(addrChan <-chan string) error {
 
 		if info.EnvLoad.ErrorNo != 0 {
 			logFilePath := path.Join(c.params.LogDir, fmt.Sprintf("s-%s", fileNameBase))
-			if err = ioutil.WriteFile(logFilePath, []byte(payload), 0644); err != nil {
-				log.Println(err)
-			}
-
+			writeLog(logFilePath, payload)
 			log.Printf("Found device http://%s, with env error %d\n", addr, info.EnvLoad.ErrorNo)
 			continue
 		}
 
 		logFilePath := path.Join(c.params.LogDir, fileNameBase)
-		if err = ioutil.WriteFile(logFilePath, []byte(payload), 0644); err != nil {
-			log.Println(err)
+		deviceInfoSerialized, err := json.Marshal(info.DeviceInfo)
+		if err != nil {
+			writeLog(logFilePath, payload)
+		} else {
+			payload += fmt.Sprintf(`<br><pre>%s</pre>`, string(deviceInfoSerialized))
+			writeLog(logFilePath, payload)
 		}
 
 		log.Printf("Found device http://%s\n", addr)
@@ -117,5 +119,11 @@ func (c *command) getClientConfig(addr string) defewayclient.DefewayClientConfig
 			TLSSkipVerify:     c.params.TLSSkipVerify,
 			DisableKeepAlives: true,
 		},
+	}
+}
+
+func writeLog(logFilePath, payload string) {
+	if err := ioutil.WriteFile(logFilePath, []byte(payload), 0644); err != nil {
+		log.Println(err)
 	}
 }
