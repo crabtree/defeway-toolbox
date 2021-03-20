@@ -103,6 +103,7 @@ func (rm *RecordingsClient) fetchAllWithRetry(
 			continue
 		}
 
+		retryCount = 0 // if successful fetch then reset retry counter
 		result = append(result, recSearchRes.RecSearch.SearchResults...)
 
 		recSearch.SessionIdx += recSearch.SessionCount
