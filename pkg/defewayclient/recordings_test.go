@@ -2,6 +2,7 @@ package defewayclient
 
 import (
 	"bytes"
+	"fmt"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -108,6 +109,43 @@ func Test_RecordingsClient_Fetch(t *testing.T) {
 
 		require.NoError(t, err)
 		require.Equal(t, 2, len(recordings))
+	})
+
+	t.Run("returns slice with recordings resetting retry counter", func(t *testing.T) {
+		calls := 0
+		responses := 0
+		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+			require.Equal(t, `/cgi-bin/gw.cgi`, req.URL.Path)
+			if calls < 10 {
+				calls += 1
+				rw.Write([]byte(""))
+				return
+			}
+
+			calls = 0 // resetting calls counter
+			responses += 1
+			sessionsIdx := responses*10 - 10
+
+			juanMarshaled := `
+			<juan ver="" squ="" dir="0" enc="0" errno="0">
+				<recsearch usr="admin" pwd="passwd" channels="3" types="15" date="2019-01-01" begin="00:00:00" end="23:59:59" session_index="` + fmt.Sprintf("%d", sessionsIdx) + `" session_count="10" session_total="20">
+					<s>0|1|3|8|1572887777|1572887780</s>
+					<s>0|2|3|8|1572888888|1572888890</s>
+				</recsearch>
+			</juan>`
+			rw.Write([]byte(juanMarshaled))
+		}))
+		defer server.Close()
+
+		rm := &RecordingsClient{
+			fetchClient: fixClient(server.Client(), server.URL[7:]),
+		}
+		fetchParams := RecordingsFetchParams{}
+
+		recordings, err := rm.Fetch(fetchParams)
+
+		require.NoError(t, err)
+		require.Equal(t, 4, len(recordings))
 	})
 }
 

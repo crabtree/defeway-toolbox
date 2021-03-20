@@ -67,6 +67,36 @@ func Test_DeviceInfoClient_Fetch(t *testing.T) {
 		require.Equal(t, "max retry count reached", err.Error())
 	})
 
+	t.Run("returns error when there is no valid devinfo response - JSON response", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+			require.Equal(t, `/cgi-bin/gw.cgi`, req.URL.Path)
+			invalidJSONResponse := `{}`
+			rw.Write([]byte(invalidJSONResponse))
+		}))
+		defer server.Close()
+
+		c := &DeviceInfoClient{fixClient(server.Client(), server.URL[7:])}
+
+		_, err := c.Fetch()
+
+		require.Equal(t, "max retry count reached", err.Error())
+	})
+
+	t.Run("returns error when there is no valid devinfo response - XML response", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+			require.Equal(t, `/cgi-bin/gw.cgi`, req.URL.Path)
+			invalidXMLResponse := `<foo />`
+			rw.Write([]byte(invalidXMLResponse))
+		}))
+		defer server.Close()
+
+		c := &DeviceInfoClient{fixClient(server.Client(), server.URL[7:])}
+
+		_, err := c.Fetch()
+
+		require.Equal(t, "max retry count reached", err.Error())
+	})
+
 	t.Run("returns device info", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 			require.Equal(t, `/cgi-bin/gw.cgi`, req.URL.Path)
