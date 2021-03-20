@@ -38,7 +38,7 @@ func paramsToCommandParams(params *params) downloader.DownloaderParams {
 		Overwrite:  params.Downloads.Overwrite,
 		OutputDir: path.Join(
 			params.Downloads.OutputDir,
-			params.Client.Address.String(),
+			fmt.Sprintf("%s-%d", params.Client.Address.String(), params.Client.Port),
 			params.Recordings.Date.Format("2006-01-02")),
 		RecordingTypes: params.Recordings.RecordingTypes,
 		StartTime:      params.Recordings.StartTime,
