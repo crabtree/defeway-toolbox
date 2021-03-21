@@ -95,11 +95,11 @@ func (c *command) scan(addrChan <-chan string) error {
 		}
 
 		logFilePath := path.Join(c.params.LogDir, fileNameBase)
-		deviceInfoSerialized, err := json.Marshal(info.DeviceInfo)
+		infoSerialized, err := json.MarshalIndent(info, "", "  ")
 		if err != nil {
 			writeLog(logFilePath, payload)
 		} else {
-			payload += fmt.Sprintf(`<br><pre>%s</pre>`, string(deviceInfoSerialized))
+			payload += fmt.Sprintf(`<br><pre>%s</pre>`, string(infoSerialized))
 			writeLog(logFilePath, payload)
 		}
 

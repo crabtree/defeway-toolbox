@@ -31,9 +31,15 @@ func (sc *DeviceInfoClient) Fetch() (*DefewayJuan, error) {
 		envLoad := DefewayEnvLoad{
 			Username: sc.Username,
 			Password: sc.Password,
+			Network:  &DefewayNetwork{},
 		}
 		devInfo := DefewayDeviceInfo{}
-		payload := NewForDeviceInfo(envLoad, devInfo)
+		hdd := DefewayHDD{
+			Username: sc.Username,
+			Password: sc.Password,
+			Action:   0,
+		}
+		payload := NewForDeviceInfo(envLoad, devInfo, hdd)
 
 		payloadStr, err := payload.Marshal()
 		if err != nil {
