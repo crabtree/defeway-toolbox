@@ -122,6 +122,21 @@ func TestUnmarshalJuan(t *testing.T) {
 		validateEnvLoad(t, juan.EnvLoad)
 		validateDeviceInfo(t, juan.DeviceInfo)
 	})
+
+	t.Run("unmarshall XML from bytes with HDD with results", func(t *testing.T) {
+		juanMarshaled := `
+		<juan ver="" squ="" dir="0" errno="0">
+		    <hdd errno="0" usr="admin" pwd="p@ssw0rd" action="0">
+			    <d>Seagate 12345|5|2000|1000</d>
+			</hdd>
+		</juan>`
+		juan, err := UnmarshalJuan([]byte(juanMarshaled))
+
+		require.NoError(t, err)
+		require.NotNil(t, juan.HDD)
+		validateHDD(t, juan.HDD)
+		validateJuan(t, juan)
+	})
 }
 
 func TestRecordingMeta_GetFileName(t *testing.T) {
@@ -212,4 +227,18 @@ func validateDeviceInfo(t *testing.T, ddi *DefewayDeviceInfo) {
 	require.Equal(t, uint16(60001), ddi.RemoteHTTPPort)
 	require.Equal(t, uint16(60001), ddi.RemoteClientPort)
 	require.Equal(t, uint8(32), ddi.CamCount)
+}
+
+func validateHDD(t *testing.T, hdd *DefewayHDD) {
+	require.Equal(t, "admin", hdd.Username)
+	require.Equal(t, "p@ssw0rd", hdd.Password)
+	require.Equal(t, uint8(0), hdd.Action)
+
+	require.Equal(t, 1, len(hdd.Disks))
+
+	disk1 := hdd.Disks[0]
+	require.Equal(t, "Seagate 12345", disk1.Model)
+	require.Equal(t, uint8(5), disk1.Status)
+	require.Equal(t, uint64(2000), disk1.Capacity)
+	require.Equal(t, uint64(1000), disk1.Used)
 }

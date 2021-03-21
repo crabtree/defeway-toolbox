@@ -17,6 +17,7 @@ type DefewayJuan struct {
 	RecSearch  *DefewayRecSearch  `xml:"recsearch,omitempty"`
 	DeviceInfo *DefewayDeviceInfo `xml:"devinfo,omitempty"`
 	EnvLoad    *DefewayEnvLoad    `xml:"envload,omitempty"`
+	HDD        *DefewayHDD        `xml:"hdd,omitempty"`
 }
 
 func (dj *DefewayJuan) Marshal() (string, error) {
@@ -134,16 +135,84 @@ type DefewayDeviceInfo struct {
 	CamCount         uint8  `xml:"camcnt,attr"`
 }
 
-func NewForDeviceInfo(envLoad DefewayEnvLoad, devInfo DefewayDeviceInfo) *DefewayJuan {
+func NewForDeviceInfo(envLoad DefewayEnvLoad, devInfo DefewayDeviceInfo, hdd DefewayHDD) *DefewayJuan {
 	return &DefewayJuan{
 		DeviceInfo: &devInfo,
 		EnvLoad:    &envLoad,
+		HDD:        &hdd,
 	}
 }
 
 type DefewayEnvLoad struct {
-	Username string `xml:"usr,attr"`
-	Password string `xml:"pwd,attr"`
-	Type     uint8  `xml:"type,attr"`
-	ErrorNo  uint8  `xml:"errno,attr"`
+	Username string          `xml:"usr,attr"`
+	Password string          `xml:"pwd,attr"`
+	Type     uint8           `xml:"type,attr"`
+	ErrorNo  uint8           `xml:"errno,attr"`
+	Network  *DefewayNetwork `xml:"network,omitempty"`
+}
+
+type DefewayNetwork struct {
+	DHCP         uint8  `xml:"dhcp,attr"`
+	MAC          string `xml:"mac,attr"`
+	IP           string `xml:"ip,attr"`
+	Submask      string `xml:"submask,attr"`
+	Gateway      string `xml:"gateway,attr"`
+	DNS          string `xml:"dns,attr"`
+	HTTPPort     uint16 `xml:"httpport,attr"`
+	ClientPort   uint16 `xml:"clientport,attr"`
+	ENETID       string `xml:"enetid,attr"`
+	DDNS         uint8  `xml:"ddns,attr"`
+	DDNSProvider uint8  `xml:"ddnsprovide,attr"`
+	DDNSURL      string `xml:"ddnsurl,attr"`
+	DDNSUser     string `xml:"ddnsusr,attr"`
+	DDNSPassword string `xml:"ddnspwd,attr"`
+}
+
+type DefewayHDD struct {
+	Username string    `xml:"usr,attr"`
+	Password string    `xml:"pwd,attr"`
+	Action   uint8     `xml:"action,attr"`
+	Disks    []HDDMeta `xml:"d,omitempty"`
+}
+
+type HDDMeta struct {
+	Model    string
+	Capacity uint64
+	Used     uint64
+	Status   uint8 // 3 - DB error, 4 - Formatted, 5 - OK, else Unformatted
+}
+
+func (hdd *HDDMeta) UnmarshalXML(d *xml.Decoder, start xml.StartElement) error {
+	var val string
+	if err := d.DecodeElement(&val, &start); err != nil {
+		return err
+	}
+
+	valSplitted := strings.Split(val, "|")
+
+	model := valSplitted[0]
+
+	status, err := strconv.ParseUint(valSplitted[1], 10, 8)
+	if err != nil {
+		return err
+	}
+
+	capacity, err := strconv.ParseUint(valSplitted[2], 10, 64)
+	if err != nil {
+		return err
+	}
+
+	used, err := strconv.ParseUint(valSplitted[3], 10, 64)
+	if err != nil {
+		return err
+	}
+
+	*hdd = HDDMeta{
+		Model:    model,
+		Capacity: uint64(capacity),
+		Used:     uint64(used),
+		Status:   uint8(status),
+	}
+
+	return nil
 }
