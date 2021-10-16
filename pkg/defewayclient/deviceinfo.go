@@ -85,8 +85,12 @@ func parseDevInfoResp(resp *http.Response) (*DefewayJuan, bool, error) {
 		return nil, true, err
 	}
 
-	if devInfo.ErrorNo != 0 { // error response
-		return devInfo, true, fmt.Errorf("response with error code %d", devInfo.ErrorNo)
+	if isErr, msg := devInfo.HasError(); isErr {
+		return devInfo, true, fmt.Errorf(msg)
+	}
+
+	if isErr, msg := devInfo.EnvLoad.HasError(); isErr {
+		return nil, false, fmt.Errorf(msg)
 	}
 
 	if devInfo.DeviceInfo == nil {

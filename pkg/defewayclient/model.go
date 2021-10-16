@@ -29,6 +29,18 @@ func (dj *DefewayJuan) Marshal() (string, error) {
 	return string(b), nil
 }
 
+func (dj *DefewayJuan) HasError() (bool, string) {
+	if dj == nil {
+		return false, ""
+	}
+
+	if dj.ErrorNo > 0 {
+		return true, fmt.Sprintf("response with error code %d", dj.ErrorNo)
+	}
+
+	return false, ""
+}
+
 func UnmarshalJuan(data []byte) (*DefewayJuan, error) {
 	dj := &DefewayJuan{}
 	err := xml.Unmarshal(data, dj)
@@ -149,6 +161,22 @@ type DefewayEnvLoad struct {
 	Type     uint8           `xml:"type,attr"`
 	ErrorNo  uint8           `xml:"errno,attr"`
 	Network  *DefewayNetwork `xml:"network,omitempty"`
+}
+
+func (o *DefewayEnvLoad) HasError() (bool, string) {
+	if o == nil {
+		return false, ""
+	}
+
+	if o.ErrorNo == 4 {
+		return true, "invalid credentials"
+	}
+
+	if o.ErrorNo != 0 {
+		return true, fmt.Sprintf("an error occured: %d", o.ErrorNo)
+	}
+
+	return false, ""
 }
 
 type DefewayNetwork struct {
