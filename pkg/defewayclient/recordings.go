@@ -128,10 +128,8 @@ func parseRecSearchResp(resp *http.Response) (*DefewayJuan, bool, error) {
 		return nil, true, err
 	}
 
-	if recSearchRes.ErrorNo != 0 { // error response
-		return recSearchRes,
-			true,
-			fmt.Errorf("response with error code %d", recSearchRes.ErrorNo)
+	if isErr, msg := recSearchRes.HasError(); isErr { // error response
+		return recSearchRes, true, fmt.Errorf(msg)
 	}
 
 	if recSearchRes.RecSearch == nil || recSearchRes.RecSearch.SearchResults == nil { // empty recordings list
