@@ -7,8 +7,9 @@ import (
 )
 
 const (
-	FLVScriptPath = "cgi-bin/flv.cgi"
-	GWScriptPath  = "cgi-bin/gw.cgi"
+	FLVScriptPath      = "cgi-bin/flv.cgi"
+	GWScriptPath       = "cgi-bin/gw.cgi"
+	SnapshotScriptPath = "cgi-bin/snapshot.cgi"
 )
 
 type HTTPClientConfig struct {
