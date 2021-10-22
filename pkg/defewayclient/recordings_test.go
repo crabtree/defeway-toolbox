@@ -150,7 +150,7 @@ func Test_RecordingsClient_Fetch(t *testing.T) {
 }
 
 func Test_RecordingsClient_Download(t *testing.T) {
-	t.Run("returns error when max retry reached because of no recordings found", func(t *testing.T) {
+	t.Run("downloads the recording successfuly", func(t *testing.T) {
 		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
 			require.Equal(t, `/cgi-bin/flv.cgi`, req.URL.Path)
 			rw.Write([]byte("Hello!"))
