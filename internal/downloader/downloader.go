@@ -16,7 +16,6 @@ func (c *command) fetch() (<-chan dc.RecordingMeta, error) {
 
 	if cmdtoolbox.FileExists(c.params.InputFile) {
 		recordings, err = c.parseInputFile()
-
 	} else {
 		recordings, err = c.client.Fetch(c.params.ToRecordingsFetchParams())
 	}
@@ -98,7 +97,7 @@ func (c *command) download(dstPath string, recMeta dc.RecordingMeta) error {
 		}
 	}()
 
-	if err = c.client.Download(recMeta, dst); err != nil {
+	if err = c.client.Download(recMeta, dst, c.params.Preview); err != nil {
 		return err
 	}
 

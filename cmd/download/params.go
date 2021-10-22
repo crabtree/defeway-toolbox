@@ -30,11 +30,12 @@ type downloadsParams struct {
 	Concurrent int
 	OutputDir  string
 	Overwrite  bool
+	Preview    bool
 }
 
 func (p *downloadsParams) Dump() string {
-	return fmt.Sprintf("Concurrent=%d Output=%s Overwrite=%t",
-		p.Concurrent, p.OutputDir, p.Overwrite)
+	return fmt.Sprintf("Concurrent=%d Output=%s Overwrite=%t Preview=%t",
+		p.Concurrent, p.OutputDir, p.Overwrite, p.Preview)
 }
 
 type recordingsParams struct {
@@ -81,6 +82,7 @@ func NewParams() (*params, error) {
 	overwrite := flag.Bool("overwrite", false, "overwrite existing files")
 	password := flag.String("password", "", "password for the DVR")
 	port := flag.Int("port", 60001, "sets the port to the DVR")
+	preview := flag.Bool("preview", false, "download only preview")
 	flag.Var(&startTime, "start", "recording start time")
 	tlsSkipVerify := flag.Bool("tls-skip-verify", false, "disables the TLS certificate verification")
 	timeout := flag.Duration("timeout", 5*time.Second, "sets the client timeout")
@@ -127,6 +129,7 @@ func NewParams() (*params, error) {
 			Concurrent: *concurrent,
 			OutputDir:  *outputDir,
 			Overwrite:  *overwrite,
+			Preview:    *preview,
 		},
 		Recordings: &recordingsParams{
 			Channels:       uint16(channels),

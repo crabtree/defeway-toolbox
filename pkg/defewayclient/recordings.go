@@ -139,13 +139,14 @@ func parseRecSearchResp(resp *http.Response) (*DefewayJuan, bool, error) {
 	return recSearchRes, false, nil
 }
 
-func (rm *RecordingsClient) Download(recMeta RecordingMeta, dst io.Writer) error {
+func (rm *RecordingsClient) Download(recMeta RecordingMeta, dst io.Writer, isPreview bool) error {
+	endTimestamp := rm.computeEndTimestamp(recMeta, isPreview)
 	queryParams := fmt.Sprintf(`u=%s&p=%s&mode=time&chn=%d&begin=%d&end=%d&mute=false&download=1`,
 		rm.downloadClient.Username,
 		rm.downloadClient.Password,
 		recMeta.ChannelID,
 		recMeta.StartTimestamp,
-		recMeta.EndTimestamp)
+		endTimestamp)
 
 	addr := url.URL{
 		Scheme:   "http",
@@ -166,4 +167,15 @@ func (rm *RecordingsClient) Download(recMeta RecordingMeta, dst io.Writer) error
 	}
 
 	return nil
+}
+
+func (rm *RecordingsClient) computeEndTimestamp(recMeta RecordingMeta, isPreview bool) uint64 {
+	if !isPreview {
+		return recMeta.EndTimestamp
+	}
+	previewLen, _ := time.ParseDuration("1m")
+	if recMeta.EndTimestamp-recMeta.StartTimestamp <= uint64(previewLen.Seconds()) {
+		return recMeta.EndTimestamp
+	}
+	return recMeta.StartTimestamp + uint64(previewLen.Seconds())
 }
