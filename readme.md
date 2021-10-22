@@ -15,21 +15,22 @@ go build -o defewaydownload ./cmd/download
 Usage of `defewaydownload` binary:
 
 - `-addr value` - IP address of the DVR
+- `-chan value` - channel id, you can specify multiple channels, optional when `-file` specified
+- `-concurrent int` - the number of concurrent workers (default 1)
+- `-date value` - date in format YYYY-MM-DD (eg. 2019-01-01)
+- `-end value` - recordings end time
 - `-file string` - path to the XML file with a list of recordings to download
-- `-port int` - port of the DVR (default 60001)
-- `-username string` - username for the DVR (default "admin")
-- `-password string` - password for the DVR (default empty)
+- `-no-keep-alives` - do not keep connections alive
 - `-output string` - path to the downloads directory
 - `-overwrite` - overwrite existing files
-- `-concurrent int` - the number of concurrent workers (default 1)
-- `-chan value` - channel id, you can specify multiple channels, optional when `-file` specified
-- `-date value` - date in format YYYY-MM-DD (eg. 2019-01-01)
+- `-password string` - password for the DVR (default empty)
+- `-port int` - port of the DVR (default 60001)
+- `-preview` - limit the length of the downloads to about 1 minute
 - `-start value` - recordings strat time
-- `-end value` - recordings end time
-- `-type value` - recording type, you can specify multiple types, optional when `-file` specified
 - `-timeout timespan` - the timeout parameter for the HTTP client (default 5s)
 - `-tls-skip-verify` - skip TLS verification
-- `-no-keep-alives` - do not keep connections alive
+- `-type value` - recording type, you can specify multiple types, optional when `-file` specified
+- `-username string` - username for the DVR (default "admin")
 
 ## Build defeway-scan binary
 
@@ -42,11 +43,11 @@ go build -o defewayscan ./cmd/scan
 Usage of `defewayscan` binary:
 
 - `-addr value` - IP address from which the scanner should start its job
+- `-concurrent int` - the number of concurrent workers (default 1)
+- `-logdir string` - path to the logs directory
 - `-mask value` - network mask (eg. 255.255.255.0)
 - `-port value` - the port of the DVR to scan, you can specify multiple ports
-- `-username string` - username for the DVR (default "admin")
 - `-password string` - password for the DVR (default empty)
-- `-logdir string` - path to the logs directory
-- `-concurrent int` - the number of concurrent workers (default 1)
 - `-timeout timespan` - the timeout parameter for the HTTP client (default 5s)
 - `-tls-skip-verify` - skip TLS verification
+- `-username string` - username for the DVR (default "admin")
