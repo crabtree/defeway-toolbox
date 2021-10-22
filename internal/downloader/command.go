@@ -10,7 +10,7 @@ import (
 
 type RecordingsClient interface {
 	Fetch(fetchParams dc.RecordingsFetchParams) ([]dc.RecordingMeta, error)
-	Download(recMeta dc.RecordingMeta, dst io.Writer) error
+	Download(recMeta dc.RecordingMeta, dst io.Writer, isPreview bool) error
 }
 
 type command struct {

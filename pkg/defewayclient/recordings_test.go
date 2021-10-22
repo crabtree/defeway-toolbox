@@ -164,7 +164,59 @@ func Test_RecordingsClient_Download(t *testing.T) {
 		var dst bytes.Buffer
 		recMeta := RecordingMeta{}
 
-		err := rm.Download(recMeta, &dst)
+		err := rm.Download(recMeta, &dst, false)
+
+		require.NoError(t, err)
+		require.Equal(t, "Hello!", dst.String())
+	})
+
+	t.Run("requests full-time recording when is not a preview call", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+			require.Equal(t, `/cgi-bin/flv.cgi`, req.URL.Path)
+			qs := req.URL.Query()
+			require.Equal(t, "1634893200", qs["begin"][0])
+			require.Equal(t, "1634896799", qs["end"][0])
+			rw.Write([]byte("Hello!"))
+		}))
+		defer server.Close()
+
+		rm := &RecordingsClient{
+			downloadClient: fixClient(server.Client(), server.URL[7:]),
+		}
+
+		var dst bytes.Buffer
+		recMeta := RecordingMeta{
+			StartTimestamp: 1634893200,
+			EndTimestamp:   1634896799,
+		}
+
+		err := rm.Download(recMeta, &dst, false)
+
+		require.NoError(t, err)
+		require.Equal(t, "Hello!", dst.String())
+	})
+
+	t.Run("requests preview recording when it is a preview call and video length is longger than 1m", func(t *testing.T) {
+		server := httptest.NewServer(http.HandlerFunc(func(rw http.ResponseWriter, req *http.Request) {
+			require.Equal(t, `/cgi-bin/flv.cgi`, req.URL.Path)
+			qs := req.URL.Query()
+			require.Equal(t, "1634893200", qs["begin"][0])
+			require.Equal(t, "1634893260", qs["end"][0])
+			rw.Write([]byte("Hello!"))
+		}))
+		defer server.Close()
+
+		rm := &RecordingsClient{
+			downloadClient: fixClient(server.Client(), server.URL[7:]),
+		}
+
+		var dst bytes.Buffer
+		recMeta := RecordingMeta{
+			StartTimestamp: 1634893200,
+			EndTimestamp:   1634893260,
+		}
+
+		err := rm.Download(recMeta, &dst, true)
 
 		require.NoError(t, err)
 		require.Equal(t, "Hello!", dst.String())

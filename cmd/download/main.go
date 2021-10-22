@@ -40,6 +40,7 @@ func paramsToCommandParams(params *params) downloader.DownloaderParams {
 			params.Downloads.OutputDir,
 			fmt.Sprintf("%s-%d", params.Client.Address.String(), params.Client.Port),
 			params.Recordings.Date.Format("2006-01-02")),
+		Preview:        params.Downloads.Preview,
 		RecordingTypes: params.Recordings.RecordingTypes,
 		StartTime:      params.Recordings.StartTime,
 	}

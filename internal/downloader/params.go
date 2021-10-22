@@ -16,6 +16,7 @@ type DownloaderParams struct {
 	OutputDir      string
 	RecordingTypes uint16
 	StartTime      time.Time
+	Preview        bool
 }
 
 func (dp *DownloaderParams) ToRecordingsFetchParams() dc.RecordingsFetchParams {
