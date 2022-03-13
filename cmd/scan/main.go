@@ -31,5 +31,6 @@ func paramsToCommandParams(params *params) scanner.ScannerParams {
 		TLSSkipVerify: params.TLSSkipVerify,
 		Timeout:       params.Timeout,
 		Username:      params.Username,
+		WithSnapshots: params.WithSnapshots,
 	}
 }
