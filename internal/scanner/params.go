@@ -15,4 +15,5 @@ type ScannerParams struct {
 	Timeout       time.Duration
 	TLSSkipVerify bool
 	Username      string
+	WithSnapshots bool
 }

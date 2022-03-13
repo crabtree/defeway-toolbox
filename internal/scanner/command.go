@@ -8,6 +8,7 @@ import (
 	"log"
 	"math"
 	"net"
+	"os"
 	"path"
 	"strings"
 	"sync"
@@ -94,16 +95,32 @@ func (c *command) scan(addrChan <-chan string) error {
 			continue
 		}
 
+		log.Printf("Found device http://%s\n", addr)
+
 		logFilePath := path.Join(c.params.LogDir, fileNameBase)
 		infoSerialized, err := json.MarshalIndent(info, "", "  ")
 		if err != nil {
 			writeLog(logFilePath, payload)
+			continue
 		} else {
 			payload += fmt.Sprintf(`<br><pre>%s</pre>`, string(infoSerialized))
 			writeLog(logFilePath, payload)
 		}
 
-		log.Printf("Found device http://%s\n", addr)
+		dstPath := path.Join(c.params.LogDir, strings.ReplaceAll(addr, ":", "-"))
+		if err := cmdtoolbox.EnsureDir(dstPath); err != nil {
+			return err
+		}
+		var ch uint8 = 0
+		snapshotClient := defewayclient.NewSnapshotClient(c.getClientConfig(addr))
+		for ; ch < info.DeviceInfo.CamCount; ch++ {
+			fp := path.Join(dstPath, fmt.Sprintf("ch-%d.jpg", ch))
+			err := c.fetchSnapshotForCh(snapshotClient, int(ch), fp)
+			if err != nil {
+				log.Printf("Error: %s\n", err)
+				os.Remove(fp)
+			}
+		}
 	}
 
 	return nil
@@ -120,6 +137,20 @@ func (c *command) getClientConfig(addr string) defewayclient.DefewayClientConfig
 			DisableKeepAlives: true,
 		},
 	}
+}
+
+func (c *command) fetchSnapshotForCh(client *defewayclient.SnapshotClient, ch int, dstPath string) error {
+	dst, err := os.Create(dstPath)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		err := dst.Close()
+		if err != nil {
+			log.Println(err)
+		}
+	}()
+	return client.Fetch(int(ch), dst)
 }
 
 func writeLog(logFilePath, payload string) {

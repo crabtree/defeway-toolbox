@@ -20,11 +20,12 @@ type params struct {
 	Timeout       time.Duration
 	TLSSkipVerify bool
 	Username      string
+	WithSnapshots bool
 }
 
 func (p *params) Dump() string {
-	return fmt.Sprintf("Concurrent=%d LogDir=%s NetAddr=%s NetMask=%s Password=%s Ports=%d Timeout=%d TLSSkipVerify=%t Username=%s",
-		p.Concurrent, p.LogDir, p.NetAddr, p.NetMask, p.Password, p.Ports, p.Timeout, p.TLSSkipVerify, p.Username)
+	return fmt.Sprintf("Concurrent=%d LogDir=%s NetAddr=%s NetMask=%s Password=%s Ports=%d Timeout=%d TLSSkipVerify=%t Username=%s WithSnapshots=%t",
+		p.Concurrent, p.LogDir, p.NetAddr, p.NetMask, p.Password, p.Ports, p.Timeout, p.TLSSkipVerify, p.Username, p.WithSnapshots)
 }
 
 func NewParams() (*params, error) {
@@ -41,6 +42,7 @@ func NewParams() (*params, error) {
 	tlsSkipVerify := flag.Bool("tls-skip-verify", false, "disables the TLS certificate verification")
 	timeout := flag.Duration("timeout", 5*time.Second, "sets the client timeout")
 	username := flag.String("username", "admin", "username for the DVR")
+	withSnapshots := flag.Bool("with-snapshots", false, "fetch channels snapshots of discovered device")
 
 	flag.Parse()
 
@@ -70,6 +72,7 @@ func NewParams() (*params, error) {
 		TLSSkipVerify: *tlsSkipVerify,
 		Timeout:       *timeout,
 		Username:      *username,
+		WithSnapshots: *withSnapshots,
 	}, nil
 }
 
