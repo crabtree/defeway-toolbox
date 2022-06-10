@@ -62,7 +62,12 @@ func (rm *RecordingsClient) fetchAllWithRetry(
 
 	for {
 		if retryCount > retryMax {
-			return nil, fmt.Errorf("max retry count reached")
+			msg := "max retry count reached"
+			if len(result) > 0 {
+				log.Println(msg)
+				return result, nil
+			}
+			return nil, fmt.Errorf(msg)
 		}
 
 		if retryCount > 0 {
