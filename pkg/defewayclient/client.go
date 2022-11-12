@@ -36,6 +36,8 @@ func NewDefewayClient(config DefewayClientConfig) *client {
 	t := &http.Transport{
 		DisableKeepAlives: config.DisableKeepAlives,
 		TLSClientConfig:   &tls.Config{InsecureSkipVerify: config.TLSSkipVerify},
+		MaxIdleConns:      5,
+		IdleConnTimeout:   5 * time.Second,
 	}
 
 	c := &http.Client{
