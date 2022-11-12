@@ -55,6 +55,7 @@ func (sc *DeviceInfoClient) Fetch() (*DefewayJuan, error) {
 
 		resp, err := sc.Client.Get(addr.String())
 		if err != nil {
+			sc.Client.CloseIdleConnections()
 			return nil, err
 		}
 
