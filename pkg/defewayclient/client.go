@@ -2,6 +2,7 @@ package defewayclient
 
 import (
 	"crypto/tls"
+	"net"
 	"net/http"
 	"time"
 )
@@ -35,9 +36,16 @@ type client struct {
 func NewDefewayClient(config DefewayClientConfig) *client {
 	t := &http.Transport{
 		DisableKeepAlives: config.DisableKeepAlives,
-		TLSClientConfig:   &tls.Config{InsecureSkipVerify: config.TLSSkipVerify},
-		MaxIdleConns:      5,
-		IdleConnTimeout:   5 * time.Second,
+		Proxy:             http.ProxyFromEnvironment,
+		DialContext: (&net.Dialer{
+			Timeout:   config.Timeout,
+			KeepAlive: 5 * time.Second,
+		}).DialContext,
+		TLSClientConfig:       &tls.Config{InsecureSkipVerify: config.TLSSkipVerify},
+		MaxIdleConnsPerHost:   1,
+		MaxIdleConns:          100,
+		IdleConnTimeout:       5 * time.Second,
+		ExpectContinueTimeout: 1 * time.Second,
 	}
 
 	c := &http.Client{
